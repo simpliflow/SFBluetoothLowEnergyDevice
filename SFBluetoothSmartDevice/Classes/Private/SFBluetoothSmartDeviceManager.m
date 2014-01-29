@@ -30,6 +30,8 @@
 // Timing
 @property (nonatomic) BOOL isTimingCentralState;
 @property (nonatomic) BOOL isTimingDiscoveryTime;
+
+@property (nonatomic) NSMutableDictionary* discoveredDevices;
 @end
 
 
@@ -92,6 +94,7 @@ static NSArray* __managerStateStrings;
     self.servicesToSearchFor = services;
     self.shouldScan = YES;
     self.delegateForIdentifier = delegate;
+    self.discoveredDevices = [@{} mutableCopy];
     
     [self startScan];
     [self startScanTimer];
@@ -160,8 +163,19 @@ static NSArray* __managerStateStrings;
 {
   NSLog(@"Scan timed out");
   [self stopScanTimer];
-  [self.delegateForIdentifier managerFailedToConnectToSuitablePeripheral:self];
-  self.identifierToSearchFor = nil;
+  
+  if (!self.identifierToSearchFor && self.discoveredDevices.count > 0) {
+    NSLog(@"Discovery timed out, found %d peripherals.", self.discoveredDevices.count);
+    NSNumber* strongestRSSI = [self.discoveredDevices.allKeys valueForKeyPath:@"@max.intValue"];
+    CBPeripheral* peripheralWithStrongestRSSI = self.discoveredDevices[strongestRSSI];
+    self.suitablePeripheral = peripheralWithStrongestRSSI;
+    [self startConnectTimer];
+    [self.bleManager connectPeripheral:peripheralWithStrongestRSSI options:nil];
+  }
+  else {
+    [self.delegateForIdentifier managerFailedToConnectToSuitablePeripheral:self];
+    self.identifierToSearchFor = nil;
+  }
 }
 
 
@@ -207,12 +221,16 @@ static NSArray* __managerStateStrings;
 
 - (void)centralManager:(CBCentralManager*)central didDiscoverPeripheral:(CBPeripheral*)peripheral advertisementData:(NSDictionary*)advertisementData RSSI:(NSNumber*)RSSI
 {
-  if (!self.identifierToSearchFor || [self.identifierToSearchFor isEqual:peripheral.identifier]) {
+  if ([self.identifierToSearchFor isEqual:peripheral.identifier]) {
     [self stopScanTimer];
     self.suitablePeripheral = peripheral;
     [self startConnectTimer];
     [self.bleManager connectPeripheral:peripheral options:nil];
     NSLog(@"Did discover suitable peripheral: %@", peripheral);
+  }
+  else if (!self.identifierToSearchFor) {
+    self.discoveredDevices[RSSI] = peripheral;
+    NSLog(@"Did discover suitable peripheral %@ with RSSI %@", peripheral, RSSI);
   }
   else {
     NSLog(@"Did discover unsuitable peripheral: %@", peripheral);
