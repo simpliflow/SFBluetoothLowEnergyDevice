@@ -8,7 +8,7 @@
 
 
 #import <UIKit/UIKit.h>
-#import "SFHeartRateBeltFinder.h"
+#import "SFHeartRateBeltManager.h"
 
 
 @interface SFViewController : UIViewController <SFHeartRateBeltManagerDelegate>
@@ -18,4 +18,5 @@
 
 @property (weak, nonatomic) IBOutlet UILabel* batteryLevel;
 
+- (IBAction)disconnectButtonPushed:(UIButton*)sender;
 @end

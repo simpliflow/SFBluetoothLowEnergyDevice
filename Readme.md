@@ -8,6 +8,7 @@ The Pod has a limited reporting of errors that happen during the search-connect 
 
 As long as an instance of SFBluetoothSmartDevice exists it is assumed that you want to connect to such a device. Only when the instance is deallocated, the search process is halted.
 
-## Restrictions
+## Limitations
 Due to its simplified nature the wrapper does not allow for:
 * usage of the same characteristic in more than one service of interest (i.e. if you had a device that would offer the services "Health Thermometer" and "Environment Temperature" both including the characteristic `org.bluetooth.characteristic.temperature_measurement`, you could only include one of the two services since the wrapper does not allow for a distinction between characteristics according to the service they are included in).
+* multiple instances of the same device are not supported –  same refers to the array of advertised services. Also, you will not be able to create two instances to work with different parts of the same physical BLE device (but that is a limitation of CoreBluetooth as well and not intended by the Bluetooth specification either).

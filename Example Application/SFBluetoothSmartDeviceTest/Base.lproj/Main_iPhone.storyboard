@@ -16,15 +16,15 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Searching …" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="17q-UD-Msz">
-                                <rect key="frame" x="111" y="324" width="99" height="21"/>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="top" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Searching …" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="17q-UD-Msz">
+                                <rect key="frame" x="111" y="256" width="99" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="♡" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EUh-vG-Hxc">
-                                <rect key="frame" x="121" y="253" width="36" height="51"/>
+                                <rect key="frame" x="121" y="201" width="36" height="51"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="36" id="5Lf-dy-y9M"/>
@@ -34,7 +34,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YN8-rT-oYT">
-                                <rect key="frame" x="157" y="263" width="43" height="32"/>
+                                <rect key="frame" x="157" y="211" width="43" height="32"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="43" id="1S0-7a-LLZ"/>
@@ -55,20 +55,32 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Lpu-AZ-GKR">
+                                <rect key="frame" x="121" y="372" width="78" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Disconnect">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="disconnectButtonPushed:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="mEv-fV-1if"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="17q-UD-Msz" firstAttribute="top" secondItem="YN8-rT-oYT" secondAttribute="bottom" constant="29" id="96h-eu-2Ig"/>
-                            <constraint firstItem="YN8-rT-oYT" firstAttribute="top" secondItem="X1J-cG-yn2" secondAttribute="bottom" constant="243" id="CRb-lL-9dg"/>
+                            <constraint firstItem="17q-UD-Msz" firstAttribute="top" secondItem="YN8-rT-oYT" secondAttribute="bottom" constant="13" id="96h-eu-2Ig"/>
+                            <constraint firstItem="YN8-rT-oYT" firstAttribute="top" secondItem="X1J-cG-yn2" secondAttribute="bottom" constant="191" id="CRb-lL-9dg"/>
+                            <constraint firstItem="Lpu-AZ-GKR" firstAttribute="top" secondItem="17q-UD-Msz" secondAttribute="bottom" constant="95" id="Jke-7Q-F6B"/>
+                            <constraint firstItem="Lpu-AZ-GKR" firstAttribute="centerX" secondItem="17q-UD-Msz" secondAttribute="centerX" id="MTw-jE-0yZ"/>
                             <constraint firstItem="YN8-rT-oYT" firstAttribute="leading" secondItem="EUh-vG-Hxc" secondAttribute="trailing" id="Myw-UT-5B6"/>
                             <constraint firstItem="17q-UD-Msz" firstAttribute="centerX" secondItem="kh9-bI-dsS" secondAttribute="centerX" id="VDG-QN-E21"/>
                             <constraint firstItem="EUh-vG-Hxc" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" constant="121" id="YXg-oc-6jK"/>
                             <constraint firstItem="NSY-kX-oJh" firstAttribute="baseline" secondItem="GiP-39-XuX" secondAttribute="baseline" id="Z70-ej-L2y"/>
-                            <constraint firstItem="EUh-vG-Hxc" firstAttribute="top" secondItem="X1J-cG-yn2" secondAttribute="bottom" constant="233" id="nhY-rR-HxL"/>
+                            <constraint firstItem="EUh-vG-Hxc" firstAttribute="top" secondItem="X1J-cG-yn2" secondAttribute="bottom" constant="181" id="nhY-rR-HxL"/>
                             <constraint firstItem="NSY-kX-oJh" firstAttribute="leading" secondItem="GiP-39-XuX" secondAttribute="trailing" constant="1" id="qCe-XN-zFi"/>
                             <constraint firstAttribute="trailing" secondItem="NSY-kX-oJh" secondAttribute="trailing" constant="20" symbolic="YES" id="ud2-B4-vMX"/>
                             <constraint firstAttribute="bottom" secondItem="NSY-kX-oJh" secondAttribute="bottom" constant="20" symbolic="YES" id="wEB-d3-Znu"/>
-                            <constraint firstItem="17q-UD-Msz" firstAttribute="top" secondItem="EUh-vG-Hxc" secondAttribute="bottom" constant="20" id="xlJ-EB-jw2"/>
+                            <constraint firstItem="17q-UD-Msz" firstAttribute="top" secondItem="EUh-vG-Hxc" secondAttribute="bottom" constant="4" id="xlJ-EB-jw2"/>
                         </constraints>
                     </view>
                     <connections>
