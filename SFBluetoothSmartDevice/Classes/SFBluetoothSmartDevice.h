@@ -23,6 +23,7 @@
 @property (nonatomic, readonly) NSDictionary* servicesWithCharacteristics;
 @property (nonatomic, readonly) BOOL connected;
 @property (nonatomic, readonly) NSError* error;
+@property (nonatomic, readonly) NSString* name;
 @property (nonatomic, readonly) NSUUID* identifier;
 /// Battery level of device in percent (100 is fully charged, 0 is fully discharged)
 @property (nonatomic, readonly) UInt8 batteryLevel;

@@ -150,6 +150,15 @@ static dispatch_queue_t __bleManagerQueue;
 }
 
 
+- (NSString*)name
+{
+  if (self.peripheral)
+    return self.peripheral.name;
+  else
+    return nil;
+}
+
+
 
 
 #pragma Private Methods
