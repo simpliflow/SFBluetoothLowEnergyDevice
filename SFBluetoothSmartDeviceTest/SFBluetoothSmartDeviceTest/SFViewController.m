@@ -54,7 +54,7 @@
 
 - (void)manager:(SFHeartRateBeltFinder*)manager connectedToHeartRateBelt:(NSUUID*)beltIdentifier
 {
-  self.heartRateBeltState.text = @"Connected";
+  self.heartRateBeltState.text = [NSString stringWithFormat:@"Connected to\n%@", manager.heartRateBelt.name];
 }
 
 

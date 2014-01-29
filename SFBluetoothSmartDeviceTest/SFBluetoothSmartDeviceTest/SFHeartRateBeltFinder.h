@@ -23,6 +23,8 @@
 CWL_DECLARE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHeartRateBeltManager)
 @property (nonatomic, assign) id<SFHeartRateBeltManagerDelegate> delegate;
 
+@property (nonatomic, readonly) SFBluetoothSmartDevice* heartRateBelt;
+
 /// Is -1 if not connected to any belt. If connected to a belt this value
 /// is updated every 5min.
 @property (nonatomic, readonly) SInt8 batteryPercentageOfConnectedBelt;

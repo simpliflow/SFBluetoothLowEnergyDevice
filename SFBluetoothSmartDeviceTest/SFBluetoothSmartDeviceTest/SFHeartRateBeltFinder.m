@@ -30,7 +30,7 @@ static NSString* kBleCharHeartRateMeasurement = @"2A37";
 
 @interface SFHeartRateBeltFinder ()
 @property (readwrite) SInt8 batteryPercentageOfConnectedBelt;
-@property (nonatomic) SFBluetoothSmartDevice* heartRateBelt;
+@property (readwrite) SFBluetoothSmartDevice* heartRateBelt;
 @end
 
 
