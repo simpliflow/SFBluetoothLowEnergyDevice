@@ -19,6 +19,8 @@ statement; \
 
 #import "SFBluetoothSmartDevice.h"
 
+#import "ARAnalytics.h"
+
 
 static NSString* kSFBluetoothSmartServiceBatteryUUID = @"180F";
 static NSString* kSFBluetoothSmartCharacteristicBatteryLevelUUID = @"2A19";
@@ -59,6 +61,7 @@ static dispatch_queue_t __bleManagerQueue;
   static dispatch_once_t once;
   dispatch_once(&once, ^{
     __deviceManager = [SFBluetoothSmartDeviceManager deviceManager];
+    [ARAnalytics setupGoogleAnalyticsWithID:@"UA-45282609-2"];
   });
 }
 
