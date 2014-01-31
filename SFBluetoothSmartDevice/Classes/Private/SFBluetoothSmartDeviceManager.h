@@ -21,12 +21,15 @@
 
 @interface SFBluetoothSmartDeviceManager : NSObject <CBCentralManagerDelegate>
 
+@property (nonatomic, assign) NSObject<SFBluetoothSmartDeviceManagerDelegate>* delegate;
+
 + (instancetype)deviceManager;
 
-@property (nonatomic) NSTimeInterval timeout;
+/// Starts the find cycle that only ends if a device is successfully found or if it is cancelled
+- (void)find:(NSUUID*)identifier advertising:(NSArray*)services;
 
-- (void)find:(NSUUID*)identifier advertising:(NSArray*)services for:(id<SFBluetoothSmartDeviceManagerDelegate>)delegate;
-- (void)cancelPeripheralConnection:(CBPeripheral*)peripheral;
+/// Cancels the find cycle
+- (void)cancelConnection;
 @end
 
 
@@ -34,6 +37,6 @@
 
 @protocol SFBluetoothSmartDeviceManagerDelegate
 - (void)manager:(SFBluetoothSmartDeviceManager*)manager connectedToSuitablePeripheral:(CBPeripheral*)peripheral;
-- (void)managerFailedToConnectToSuitablePeripheral:(SFBluetoothSmartDeviceManager*)manager;
+- (void)managerFailedToConnectToSuitablePeripheral:(SFBluetoothSmartDeviceManager*)manager error:(NSError*)error;
 - (void)manager:(SFBluetoothSmartDeviceManager*)manager disconnectedFromPeripheral:(CBPeripheral*)peripheral;
 @end

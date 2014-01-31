@@ -33,6 +33,8 @@ static NSString* kSFBluetoothSmartCharacteristicBatteryLevelUUID = @"2A19";
 @property (readwrite) NSError* error;
 @property (readwrite) UInt8 batteryLevel;
 
+@property (nonatomic) SFBluetoothSmartDeviceManager* deviceManager;
+
 @property (nonatomic) NSMutableDictionary* characteristicsByUUID;
 @property (nonatomic) NSMutableDictionary* servicesByUUID;
 @property (nonatomic) NSArray* advertisingServices;
@@ -53,14 +55,12 @@ static NSString* kSFBluetoothSmartCharacteristicBatteryLevelUUID = @"2A19";
 
 #pragma Class Variables and Methods
 
-static SFBluetoothSmartDeviceManager* __deviceManager;
 static dispatch_queue_t __bleManagerQueue;
 
 + (void)initialize
 {
   static dispatch_once_t once;
   dispatch_once(&once, ^{
-    __deviceManager = [SFBluetoothSmartDeviceManager deviceManager];
     [ARAnalytics setupGoogleAnalyticsWithID:@"UA-45282609-2"];
   });
 }
@@ -79,7 +79,7 @@ static dispatch_queue_t __bleManagerQueue;
 - (id)initWithServicesAndCharacteristics:(NSDictionary*)servicesAndCharacteristics advertising:(NSArray*)services andIdentifier:(NSUUID*)identifier
 {
   if (self = [super init]) {
-    
+
     // Check
     //   * the keys of servicesAndCharacteristics
     //   * the elements within the arrays that are the values of servicesAndCharacteristics
@@ -105,7 +105,10 @@ static dispatch_queue_t __bleManagerQueue;
     self.identifier = identifier;
     self.advertisingServices = services;
     _servicesAndCharacteristics = servicesAndCharacteristics;
-    [__deviceManager find:self.identifier advertising:self.advertisingServices for:self];
+    
+    _deviceManager = [SFBluetoothSmartDeviceManager deviceManager];
+    _deviceManager.delegate = self;
+    [_deviceManager find:self.identifier advertising:self.advertisingServices];
     
     self.servicesByUUID = [@{} mutableCopy];
     self.characteristicsByUUID = [@{} mutableCopy];
@@ -117,9 +120,9 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)disconnect
 {
-  NSLog(@"BLE-device is disconnecting");
+  NSLog(@"BLE-device: disconnecting");
   self.shouldConnect = NO;
-  [__deviceManager cancelPeripheralConnection:self.peripheral];
+  [self.deviceManager cancelConnection];
 }
 
 
@@ -169,7 +172,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)dealloc
 {
-  NSLog(@"Deallocating BLE device");
+  NSLog(@"BLE-Device: Deallocating");
   if (self.connected)
     [self disconnect];
 }
@@ -260,28 +263,31 @@ static dispatch_queue_t __bleManagerQueue;
 }
 
 
-- (void)managerFailedToConnectToSuitablePeripheral:(SFBluetoothSmartDeviceManager*)manager
+- (void)managerFailedToConnectToSuitablePeripheral:(SFBluetoothSmartDeviceManager*)manager error:(NSError*)error
 {
   DISPATCH_ON_MAIN_QUEUE(
                          self.connected = NO;
-                         if (self.shouldConnect &&
-                             (![self.delegate respondsToSelector:@selector(shouldContinueSearch)] || [self.delegate shouldContinueSearch])) {
-                           [__deviceManager find:self.identifier advertising:self.advertisingServices for:self];
+                         if (!self.shouldConnect ||
+                             ([self.delegate respondsToSelector:@selector(shouldContinueSearch)] && ![self.delegate shouldContinueSearch])) {
+                           [self.deviceManager cancelConnection];
                          }
-                         ) 
-  NSLog( @"BLE-Device: manager failed to connect");
+                         
+//                         [ARAnalytics error:error withMessage:peripheral.name];
+                         )
+  NSLog( @"BLE-Device: central failed to connect");
 }
 
 
 - (void)manager:(SFBluetoothSmartDeviceManager*)manager disconnectedFromPeripheral:(CBPeripheral*)peripheral
 {
+  NSLog(@"BLE-Device: central disconnected from peripheral");
   DISPATCH_ON_MAIN_QUEUE(self.connected = NO);
   [self stopDiscoveryTimer];
   
   if (self.shouldConnect) {
     // TODO: refine error statement
     DISPATCH_ON_MAIN_QUEUE(self.error = [NSError errorWithDomain:@"BLEError" code:0 userInfo:@{NSLocalizedDescriptionKey: @"Error happened"}])
-    [__deviceManager find:self.identifier advertising:self.advertisingServices for:self];
+//    [self.deviceManager find:self.identifier advertising:self.advertisingServices for:self];
   }
 }
 
@@ -317,7 +323,7 @@ static dispatch_queue_t __bleManagerQueue;
   if (self.servicesByUUID.count == self.servicesAndCharacteristics.count &&
       self.characteristicsByUUID.count == ((NSArray*)[self.servicesAndCharacteristics.allValues valueForKeyPath:@"@unionOfArrays.self"]).count) {
     [self stopDiscoveryTimer];
-    NSLog(@"Connect and discovery complete");
+    NSLog(@"BLE-Device: Connect and discovery complete");
     DISPATCH_ON_MAIN_QUEUE(self.connected = YES;)
   }
 }
