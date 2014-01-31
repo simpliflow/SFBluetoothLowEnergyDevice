@@ -55,12 +55,16 @@
 - (void)manager:(SFHeartRateBeltFinder*)manager connectedToHeartRateBelt:(NSUUID*)beltIdentifier
 {
   self.heartRateBeltState.text = [NSString stringWithFormat:@"Connected to\n%@", manager.heartRateBelt.name];
+  self.heartRateBeltState.numberOfLines = 2;
+  [self.heartRateBeltState sizeToFit];
 }
 
 
 - (void)managerFailedToConnectToHRBelt:(SFHeartRateBeltFinder*)manager
 {
   self.heartRateBeltState.text = @"Disconnected";
+  self.heartRateBeltState.numberOfLines = 1;
+  [self.heartRateBeltState sizeToFit];
   [manager startSearch];
 }
 
