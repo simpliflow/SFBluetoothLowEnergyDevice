@@ -13,16 +13,32 @@
 
 @protocol SFBluetoothSmartDeviceDelegate;
 
-// Will try to connect as long as it is in existence
+
+
+// Error codes for NSErrors, domain is "SFBluetoothSmartDevice"
+typedef NS_ENUM(NSInteger, SFBluetoothSmartError) {
+  SFBluetoothSmartErrorUnableToDistinguishClosestDevice = 0,
+  SFBluetoothSmartErrorProblemsInConnectionProcess,
+  SFBluetoothSmartErrorProblemsInDiscoveryProcess,
+  SFBluetoothSmartErrorConnectionClosedByDevice,
+  SFBluetoothSmartErrorUnknown
+};
+
+
+
+
+// Will try to connect until device is found, disconnect is called or it is deallocated
+
 
 @interface SFBluetoothSmartDevice : NSObject <CBPeripheralDelegate, SFBluetoothSmartDeviceManagerDelegate>
 
 + (instancetype)withTheseServicesAndCharacteristics:(NSDictionary*)servicesAndCharacteristics advertising:(NSArray*)services andIdentifyingItselfWith:(NSUUID*)identifier;
 
 @property (nonatomic, assign) NSObject<SFBluetoothSmartDeviceDelegate>* delegate;
-@property (nonatomic, readonly) NSDictionary* servicesWithCharacteristics;
+
+
 @property (nonatomic, readonly) BOOL connected;
-@property (nonatomic, readonly) NSError* error;
+
 @property (nonatomic, readonly) NSString* name;
 @property (nonatomic, readonly) NSUUID* identifier;
 /// Battery level of device in percent (100 is fully charged, 0 is fully discharged)
@@ -40,9 +56,12 @@
 
 
 @protocol SFBluetoothSmartDeviceDelegate
+- (void)BTSmartDeviceConnectedSuccessfully:(SFBluetoothSmartDevice*)device;
+/// Although the error is encountered search for the device does not stop. If the connection
+/// has been lost it is tried to reconnect (again: either to the device with the specified identifier or the nearest one).
+- (void)BTSmartDeviceEncounteredError:(NSError*)error;
 - (void)BTSmartDevice:(SFBluetoothSmartDevice*)device receivedData:(NSData*)data fromCharacteristic:(CBUUID*)uuid;
 @optional
-- (BOOL)shouldContinueSearch;
 - (void)noBluetooth;
 - (void)fixedNoBluetooth;
 @end
