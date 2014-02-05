@@ -295,12 +295,16 @@ static dispatch_queue_t __bleManagerQueue;
 - (void)bluetoothNotAvailable
 {
   NSLog(@"BLE-Device: Bluetooth not available");
+  if ([self.delegate respondsToSelector:@selector(noBluetooth)])
+    [self.delegate noBluetooth];
 }
 
 
 - (void)bluetoothAvailableAgain
 {
   NSLog(@"BLE-Device: Bluetooth no longer not available.");
+  if ([self.delegate respondsToSelector:@selector(fixedNoBluetooth)])
+    [self.delegate fixedNoBluetooth];
 }
 
 

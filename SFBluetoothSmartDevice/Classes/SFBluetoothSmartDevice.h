@@ -43,4 +43,6 @@
 - (void)BTSmartDevice:(SFBluetoothSmartDevice*)device receivedData:(NSData*)data fromCharacteristic:(CBUUID*)uuid;
 @optional
 - (BOOL)shouldContinueSearch;
+- (void)noBluetooth;
+- (void)fixedNoBluetooth;
 @end
