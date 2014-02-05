@@ -108,20 +108,33 @@ static dispatch_queue_t __bleManagerQueue;
     
     _deviceManager = [SFBluetoothSmartDeviceManager deviceManager];
     _deviceManager.delegate = self;
-    [_deviceManager find:self.identifier advertising:self.advertisingServices];
     
-    self.servicesByUUID = [@{} mutableCopy];
-    self.characteristicsByUUID = [@{} mutableCopy];
-    self.shouldConnect = YES;
+    [self connect];
   }
   return self;
 }
 
 
+- (void)connect
+{
+  self.shouldConnect = YES;
+}
+- (void)executeConnectDuties
+{
+  NSLog(@"BLE-device: connecting");
+  self.servicesByUUID = [@{} mutableCopy];
+  self.characteristicsByUUID = [@{} mutableCopy];
+  [_deviceManager find:self.identifier advertising:self.advertisingServices];
+}
+
+
 - (void)disconnect
 {
-  NSLog(@"BLE-device: disconnecting");
   self.shouldConnect = NO;
+}
+- (void)executeDisconnectDuties
+{
+  NSLog(@"BLE-device: disconnecting");
   [self.deviceManager cancelConnection];
 }
 
@@ -285,9 +298,8 @@ static dispatch_queue_t __bleManagerQueue;
   [self stopDiscoveryTimer];
   
   if (self.shouldConnect) {
-    // TODO: refine error statement
-    DISPATCH_ON_MAIN_QUEUE(self.error = [NSError errorWithDomain:@"BLEError" code:0 userInfo:@{NSLocalizedDescriptionKey: @"Error happened"}])
-//    [self.deviceManager find:self.identifier advertising:self.advertisingServices for:self];
+    DISPATCH_ON_MAIN_QUEUE([self.delegate BTSmartDeviceEncounteredError:[self error:SFBluetoothSmartErrorProblemsInDiscoveryProcess]]);
+    [self executeConnectDuties];
   }
 }
 
@@ -296,7 +308,9 @@ static dispatch_queue_t __bleManagerQueue;
 {
   NSLog(@"BLE-Device: Bluetooth not available");
   if ([self.delegate respondsToSelector:@selector(noBluetooth)])
-    [self.delegate noBluetooth];
+    DISPATCH_ON_MAIN_QUEUE([self.delegate noBluetooth]);
+  
+  [self executeDisconnectDuties];
 }
 
 
@@ -304,7 +318,21 @@ static dispatch_queue_t __bleManagerQueue;
 {
   NSLog(@"BLE-Device: Bluetooth no longer not available.");
   if ([self.delegate respondsToSelector:@selector(fixedNoBluetooth)])
-    [self.delegate fixedNoBluetooth];
+    DISPATCH_ON_MAIN_QUEUE([self.delegate fixedNoBluetooth]);
+  
+  if (self.shouldConnect) {
+    [self executeConnectDuties];
+  }
+}
+
+
+- (NSError*)error:(SFBluetoothSmartError)errorCode
+{
+  return [NSError errorWithDomain:@"SFBluetoothSmartError"
+                             code:errorCode
+                         userInfo:@{
+                                    NSLocalizedDescriptionKey: @"Error happened"
+                                    }];
 }
 
 
