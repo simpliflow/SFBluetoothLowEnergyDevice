@@ -39,4 +39,6 @@
 - (void)manager:(SFBluetoothSmartDeviceManager*)manager connectedToSuitablePeripheral:(CBPeripheral*)peripheral;
 - (void)managerFailedToConnectToSuitablePeripheral:(SFBluetoothSmartDeviceManager*)manager error:(NSError*)error;
 - (void)manager:(SFBluetoothSmartDeviceManager*)manager disconnectedFromPeripheral:(CBPeripheral*)peripheral;
+- (void)bluetoothNotAvailable;
+- (void)bluetoothAvailableAgain;
 @end

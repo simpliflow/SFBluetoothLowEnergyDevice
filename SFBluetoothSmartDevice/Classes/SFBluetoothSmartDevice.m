@@ -292,6 +292,18 @@ static dispatch_queue_t __bleManagerQueue;
 }
 
 
+- (void)bluetoothNotAvailable
+{
+  NSLog(@"BLE-Device: Bluetooth not available");
+}
+
+
+- (void)bluetoothAvailableAgain
+{
+  NSLog(@"BLE-Device: Bluetooth no longer not available.");
+}
+
+
 
 
 #pragma mark CBPeripheralDelegate

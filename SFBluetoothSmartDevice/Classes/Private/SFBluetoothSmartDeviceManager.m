@@ -48,6 +48,10 @@
 
 @property (nonatomic) NSMutableDictionary* discoveredDevices;
 
+
+// State of Bluetooth
+@property (nonatomic) BOOL bluetoothWasUnavailable;
+
 // # Analytics timing
 @property (nonatomic) BOOL isTimingCentralState;
 @property (nonatomic) BOOL isTimingDiscoveryTime;
@@ -92,6 +96,7 @@ static NSArray* __managerStateStrings;
     // TODO: make queue a class variable
     _bleManagerQueue = dispatch_queue_create("com.simpliflow_ble_device_central.queue", DISPATCH_QUEUE_SERIAL);
     _bleManager = [[CBCentralManager alloc] initWithDelegate:self queue:_bleManagerQueue];
+    self.bluetoothWasUnavailable = NO;
   }
   return self;
 }
@@ -216,7 +221,7 @@ static NSArray* __managerStateStrings;
   [self connectToSuitablePeripheral];
 }
 
-
+// TODO: rename to "invalidate..."
 - (void)cancelScanForAlternativesTimer
 {
   if (_scanForAlternatesTimeoutBlock) {
@@ -294,10 +299,28 @@ static NSArray* __managerStateStrings;
 {
   NSLog(@"Central did update state to %@", __managerStateStrings[central.state]);
   if (central.state == CBCentralManagerStatePoweredOn) {
+    
     if (self.isTimingCentralState) {
       self.isTimingDiscoveryTime = NO;
     }
     [self startScan];
+    
+    if (self.bluetoothWasUnavailable && [self.delegate respondsToSelector:@selector(bluetoothAvailableAgain)])
+      [self.delegate bluetoothAvailableAgain];
+  }
+  else if (central.state == CBCentralManagerStatePoweredOff ||
+           central.state == CBCentralManagerStateUnsupported ||
+           central.state == CBCentralManagerStateUnauthorized) {
+    [self invalidateConnectTimer];
+    if (self.suitablePeripheral)
+      [self.bleManager cancelPeripheralConnection:self.suitablePeripheral];
+    
+    self.suitablePeripheral = nil;
+    [self cancelScanForAlternativesTimer];
+    
+    if ([self.delegate respondsToSelector:@selector(bluetoothNotAvailable)])
+      [self.delegate bluetoothNotAvailable];
+    self.bluetoothWasUnavailable = YES;
   }
 }
 
