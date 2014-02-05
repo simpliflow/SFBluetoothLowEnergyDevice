@@ -84,7 +84,7 @@ static dispatch_queue_t __bleManagerQueue;
     //   * the keys of servicesAndCharacteristics
     //   * the elements within the arrays that are the values of servicesAndCharacteristics
     //   * the services that are expected to be advertised
-    //  to be of the clas CBUUID.
+    //  to be of the class CBUUID.
     NSArray* characteristics = [servicesAndCharacteristics.allValues valueForKeyPath:@"@unionOfArrays.self"];
     for (NSArray* shouldBeUUIDs in @[servicesAndCharacteristics.allKeys, characteristics, services]) {
       for (id shouldBeUUID in servicesAndCharacteristics.allKeys) {
@@ -139,6 +139,11 @@ static dispatch_queue_t __bleManagerQueue;
 }
 
 
+
+#pragma mark -
+#pragma mark Methods While Connected
+
+
 - (void)readValueForCharacteristic:(CBUUID*)characteristicUUID
 {
   if (!self.connected)
@@ -185,7 +190,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)dealloc
 {
-  NSLog(@"BLE-Device: Deallocating");
+  NSLog(@"BLE-Device: deallocating");
   if (self.connected)
     [self disconnect];
 }
@@ -264,6 +269,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 
 
+
 #pragma mark SFBluetoothSmartDeviceManagerDelegate
 
 
@@ -287,7 +293,7 @@ static dispatch_queue_t __bleManagerQueue;
                          
 //                         [ARAnalytics error:error withMessage:peripheral.name];
                          )
-  NSLog( @"BLE-Device: central failed to connect");
+  NSLog(@"BLE-Device: central failed to connect");
 }
 
 
@@ -367,7 +373,7 @@ static dispatch_queue_t __bleManagerQueue;
   if (self.servicesByUUID.count == self.servicesAndCharacteristics.count &&
       self.characteristicsByUUID.count == ((NSArray*)[self.servicesAndCharacteristics.allValues valueForKeyPath:@"@unionOfArrays.self"]).count) {
     [self stopDiscoveryTimer];
-    NSLog(@"BLE-Device: Connect and discovery complete");
+    NSLog(@"BLE-Device: connect and discovery complete");
     DISPATCH_ON_MAIN_QUEUE(self.connected = YES;)
   }
 }
