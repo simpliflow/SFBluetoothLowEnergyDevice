@@ -132,12 +132,12 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHe
     // the line where the timer is invalidated.
     // It is unclear if this can happen, or if the methods are run atomically on a single thread.
     // This is definitely worth reporting to analytics
-    NSLog(@"ERROR: Heart rate belt is connected although the find process timed out.");
+    // NSLog(@"ERROR: Heart rate belt is connected although the find process timed out.");
     // TODO: add analytics reporting of this condition
     return;
   }
   
-  NSLog(@"Search for belt timed out.");
+  // NSLog(@"Search for belt timed out.");
   
   self.heartRateBelt = nil;
   [self.delegate manager:self failedToConnectWithError:[self error:SFHRErrorNoDeviceFound]];
@@ -256,7 +256,7 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHe
 // fore the own cbcentralmanager)
 - (void)fixedNoBluetooth
 {
-  NSLog(@"Bluetooth available again. This should not be called!!");
+  // NSLog(@"Bluetooth available again. This should not be called!!");
   [self.delegate bluetoothAvailableAgain];
 }
 
