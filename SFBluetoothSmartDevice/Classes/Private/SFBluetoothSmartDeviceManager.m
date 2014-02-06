@@ -120,9 +120,9 @@ static NSArray* __managerStateStrings;
     
     NSString* servicesString = [[services valueForKeyPath:@"@unionOfObjects.description"] componentsJoinedByString:@", "];
     if (identifier)
-      NSLog(@"Scanning for peripheral (%@) advertising: %@", identifier, servicesString);
+      NSLog(@"BLE-Manager: Scanning for peripheral (%@) advertising: %@", identifier, servicesString);
     else
-      NSLog(@"Scanning for any peripheral advertising: %@", servicesString);
+      NSLog(@"BLE-Manager: Scanning for any peripheral advertising: %@", servicesString);
     
     self.identifierToSearchFor = identifier;
     self.servicesToSearchFor = services;
@@ -167,7 +167,7 @@ static NSArray* __managerStateStrings;
 - (void)startScan
 {
   if (self.findProcessShouldRun && self.shouldScan && self.bleManager.state == CBCentralManagerStatePoweredOn) {
-    NSLog(@"Starting scan for suitable devices");
+    NSLog(@"BLE-Manager: Starting scan for suitable devices");
     self.connectionAttemptHasTimedOutBefore = NO;
     self.discoveredDevices = [@{} mutableCopy];
     [self.bleManager scanForPeripheralsWithServices:self.servicesToSearchFor options:@{CBCentralManagerScanOptionAllowDuplicatesKey : @YES}];
@@ -192,10 +192,10 @@ static NSArray* __managerStateStrings;
     
     self.discoveredDevices[RSSI] = peripheral;
     
-    NSLog(@"Did discover suitable peripheral %@ with RSSI %@", peripheral, RSSI);
+    NSLog(@"BLE-Manager: Did discover suitable peripheral %@ with RSSI %@", peripheral, RSSI);
   }
   else {
-    NSLog(@"Did discover unsuitable peripheral: %@", peripheral);
+    NSLog(@"BLE-Manager: Did discover unsuitable peripheral: %@", peripheral);
   }
 }
 
@@ -210,7 +210,7 @@ static NSArray* __managerStateStrings;
 
 - (void)scanForAlternatesTimedOut
 {
-  NSLog(@"Finished scanning for alternates, found %d peripherals.", self.discoveredDevices.count);
+  NSLog(@"BLE-Manager: Finished scanning for alternates, found %d peripherals.", self.discoveredDevices.count);
   [self stopScan];
   [self cancelScanForAlternativesTimer];
   
@@ -233,7 +233,7 @@ static NSArray* __managerStateStrings;
 
 - (void)stopScan
 {
-  NSLog(@"Stopping scan");
+  NSLog(@"BLE-Manager: Stopping scan");
   self.shouldScan = NO;
   
   if (self.bleManager.state == CBCentralManagerStatePoweredOn)
@@ -263,7 +263,7 @@ static NSArray* __managerStateStrings;
 
 - (void)centralConnectedSuccessfully
 {
-  NSLog(@"%@: central connected", self.suitablePeripheral.name);
+  NSLog(@"BLE-Manager: connected to %@", self.suitablePeripheral.name);
   [self invalidateConnectTimer];
   [self.delegate manager:self connectedToSuitablePeripheral:self.suitablePeripheral];
 }
@@ -297,12 +297,12 @@ static NSArray* __managerStateStrings;
 
 - (void)centralManagerDidUpdateState:(CBCentralManager*)central
 {
-  NSLog(@"Central did update state to %@", __managerStateStrings[central.state]);
+  NSLog(@"BLE-Manager: Central did update state to %@", __managerStateStrings[central.state]);
   if (central.state == CBCentralManagerStatePoweredOn) {
     
-    if (self.isTimingCentralState) {
-      self.isTimingDiscoveryTime = NO;
-    }
+//    if (self.isTimingCentralState) {
+//      self.isTimingDiscoveryTime = NO;
+//    }
     [self startScan];
     
     if (self.bluetoothWasUnavailable && [self.delegate respondsToSelector:@selector(bluetoothAvailableAgain)])
@@ -340,7 +340,7 @@ static NSArray* __managerStateStrings;
 
 - (void)centralManager:(CBCentralManager*)central didFailToConnectPeripheral:(CBPeripheral*)peripheral error:(NSError*)error
 {
-  NSLog(@"--  %@: central failed to connect to (%@).", peripheral.name, error.localizedDescription);
+  NSLog(@"BLE-Manager: --  %@: central failed to connect to (%@).", peripheral.name, error.localizedDescription);
   [self invalidateConnectTimer];
   
   self.suitablePeripheral = nil;
@@ -355,16 +355,16 @@ static NSArray* __managerStateStrings;
     // in case of a timeout, try a second time before reporting a failed attempt
     if (error.code == 6 && !self.connectionAttemptHasTimedOutBefore) {
       [self invalidateConnectTimer];
-      NSLog(@"Connection has timed out. Trying a second time");
+      NSLog(@"BLE-Manager: Connection has timed out. Trying a second time");
       self.connectionAttemptHasTimedOutBefore = YES;
       [self connectToSuitablePeripheral];
       return;
     }
     
-    NSLog(@"-- %@: central disconnected with error (%@).", peripheral.name, error.localizedDescription);
+    NSLog(@"BLE-Manager: -- %@: central disconnected with error (%@).", peripheral.name, error.localizedDescription);
   }
   else {
-    NSLog(@"%@: central disconnected (no error).", peripheral.name);
+    NSLog(@"BLE-Manager: %@: central disconnected (no error).", peripheral.name);
   }
   
   [self.delegate manager:self disconnectedFromPeripheral:peripheral];

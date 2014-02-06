@@ -122,7 +122,7 @@ static dispatch_queue_t __bleManagerQueue;
 }
 - (void)executeConnectDuties
 {
-  NSLog(@"BLE-device: connecting");
+  NSLog(@"BLE-device: connecting (%d)", self.hash);
   self.servicesByUUID = [@{} mutableCopy];
   self.characteristicsByUUID = [@{} mutableCopy];
   [_deviceManager find:self.identifier advertising:self.advertisingServices];
@@ -136,7 +136,7 @@ static dispatch_queue_t __bleManagerQueue;
 }
 - (void)executeDisconnectDuties
 {
-  NSLog(@"BLE-device: disconnecting");
+  NSLog(@"BLE-device: disconnecting (%d)", self.hash);
   [self.deviceManager cancelConnection];
 }
 
@@ -192,7 +192,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)dealloc
 {
-  NSLog(@"BLE-Device: deallocating");
+  NSLog(@"BLE-Device: deallocating (%d)", self.hash);
   if (self.connected)
     [self disconnect];
 }
