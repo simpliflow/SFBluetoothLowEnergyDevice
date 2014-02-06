@@ -118,6 +118,7 @@ static dispatch_queue_t __bleManagerQueue;
 - (void)connect
 {
   self.shouldConnect = YES;
+  [self executeConnectDuties];
 }
 - (void)executeConnectDuties
 {
@@ -131,6 +132,7 @@ static dispatch_queue_t __bleManagerQueue;
 - (void)disconnect
 {
   self.shouldConnect = NO;
+  [self executeDisconnectDuties];
 }
 - (void)executeDisconnectDuties
 {
