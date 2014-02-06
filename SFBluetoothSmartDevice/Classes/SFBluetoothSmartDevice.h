@@ -29,7 +29,9 @@ typedef NS_ENUM(NSInteger, SFBluetoothSmartError) {
 
 
 
-// Will try to connect until device is found, disconnect is called or it is deallocated
+
+
+// Will try to connect until device is found, disconnect is called or it is deallocated (Note: do not rely on deallocation).
 
 
 @interface SFBluetoothSmartDevice : NSObject <CBPeripheralDelegate, SFBluetoothSmartDeviceManagerDelegate>
