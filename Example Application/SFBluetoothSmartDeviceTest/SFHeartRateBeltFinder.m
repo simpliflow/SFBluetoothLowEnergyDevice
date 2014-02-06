@@ -13,7 +13,6 @@
 // Insert these to test if the BLE device really calls every method on the main thread, the internal
 // ble-queue should not leak.
 #define ASSERT_MAIN_THREAD NSAssert([[NSThread currentThread] isMainThread], @"Is not on main tread, but should be");
-#define DEFAULT_FIND_TIMEOUT 10
 
 
 // Services
@@ -72,10 +71,10 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHe
     return;
   }
   
-  if (timeout >= 0)
+  if (timeout > 0.0)
     self.timeout = timeout;
   else
-    self.timeout = DEFAULT_FIND_TIMEOUT;
+    self.timeout = 0.0;
   
   self.hrBeltHasBeenConnected = NO;
 
@@ -87,7 +86,8 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHe
   self.heartRateBelt = [SFBluetoothSmartDevice withTheseServicesAndCharacteristics:heartBeltServicesAndCharacteristics
                                                                        advertising:heartBeltAdvertisingServices
                                                           andIdentifyingItselfWith:beltIdentifier];
-  self.findTimer = [NSTimer scheduledTimerWithTimeInterval:self.timeout target:self selector:@selector(findTimedOut:) userInfo:nil repeats:NO];
+  if (self.timeout)
+    self.findTimer = [NSTimer scheduledTimerWithTimeInterval:self.timeout target:self selector:@selector(findTimedOut:) userInfo:nil repeats:NO];
 }
 
 
@@ -259,4 +259,3 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHe
 
 #undef DISPATCH_ON_MAIN_QUEUE
 #undef CBUUIDMake
-#undef DEFAULT_FIND_TIMEOUT
