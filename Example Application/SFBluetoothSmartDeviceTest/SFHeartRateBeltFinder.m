@@ -47,7 +47,6 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHe
   if (self = [super init]) {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:@"UIApplicationWillTerminateNotification" object:nil];
   }
-  
   return self;
 }
 
@@ -239,7 +238,8 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHe
   [self.findTimer invalidate];
   self.findTimer = nil;
 
-  self.heartRateBelt = nil;
+  // do not set HR belt to nil or otherwise you would not get an update when Bluetooth becomes
+  // available again
   if (self.hrBeltHasBeenConnected) {
     [self.delegate manager:self disconnectedWithError:[self error:SFHRErrorNoBluetooth]];
   }
@@ -251,6 +251,7 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHe
 
 - (void)fixedNoBluetooth
 {
+  self.heartRateBelt = nil;
   [self.delegate bluetoothAvailableAgain];
 }
 

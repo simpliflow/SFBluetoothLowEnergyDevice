@@ -27,7 +27,7 @@
   
   SFHeartRateBeltFinder* hrManager = [SFHeartRateBeltFinder sharedHeartRateBeltManager];
   hrManager.delegate = self;
-  [hrManager startSearch];
+  [hrManager connectToHeartRateBelt:nil timeout:0];
   [hrManager addObserver:self forKeyPath:@"batteryPercentageOfConnectedBelt" options:0 context:nil];
 }
 
@@ -52,26 +52,77 @@
 #pragma mark SFHeartRateBeltManagerDelegate
 
 
-- (void)manager:(SFHeartRateBeltFinder*)manager connectedToHeartRateBelt:(NSUUID*)beltIdentifier
+- (void)manager:(SFHeartRateBeltFinder*)manager connectedToHeartRateBelt:(NSUUID*)beltIdentifier name:(NSString*)name
 {
-  self.heartRateBeltState.text = [NSString stringWithFormat:@"Connected to\n%@", manager.heartRateBelt.name];
+  NSLog(@"Connected.");
   self.heartRateBeltState.numberOfLines = 2;
+  self.heartRateBeltState.text = [NSString stringWithFormat:@"Connected to\n%@", name];
   [self.heartRateBeltState sizeToFit];
 }
 
 
-- (void)managerFailedToConnectToHRBelt:(SFHeartRateBeltFinder*)manager
+- (void)manager:(SFHeartRateBeltFinder*)manager failedToConnectWithError:(NSError*)error
 {
-  self.heartRateBeltState.text = @"Disconnected";
-  self.heartRateBeltState.numberOfLines = 1;
+  if (error.code == SFHRErrorNoBluetooth) {
+    self.heartRateBeltState.numberOfLines = 1;
+    self.heartRateBeltState.text = [NSString stringWithFormat:@"No Bluetooth"];
+    [self.heartRateBeltState sizeToFit];
+    return;
+  }
+  
+  NSLog(@"Failed to connect. Error: %@", error.localizedDescription);
+  
+  self.heartRateBeltState.numberOfLines = 2;
+  self.heartRateBeltState.text = [NSString stringWithFormat:@"Failed\n%@", error.localizedDescription];
   [self.heartRateBeltState sizeToFit];
-  [manager startSearch];
+  
+  SFHeartRateBeltFinder* hrManager = [SFHeartRateBeltFinder sharedHeartRateBeltManager];
+  [hrManager connectToHeartRateBelt:nil timeout:0];
+}
+
+
+- (void)manager:(SFHeartRateBeltFinder*)manager disconnectedWithError:(NSError*)error
+{
+  if (error.code == SFHRErrorNoBluetooth) {
+    self.heartRateBeltState.numberOfLines = 1;
+    self.heartRateBeltState.text = [NSString stringWithFormat:@"No Bluetooth"];
+    [self.heartRateBeltState sizeToFit];
+    return;
+  }
+  
+  if (!error) {
+    NSLog(@"Disconnected.");
+    self.heartRateBeltState.numberOfLines = 1;
+    self.heartRateBeltState.text = @"Disconnected";
+  }
+  else {
+    NSLog(@"Disconnected. Error: %@", error.localizedDescription);
+    self.heartRateBeltState.numberOfLines = 1;
+    self.heartRateBeltState.text = [NSString stringWithFormat:@"Disconnected\n%@", error.localizedDescription];
+  }
+  [self.heartRateBeltState sizeToFit];
+
+  SFHeartRateBeltFinder* hrManager = [SFHeartRateBeltFinder sharedHeartRateBeltManager];
+  [hrManager connectToHeartRateBelt:nil timeout:0];
 }
 
 
 - (void)manager:(SFHeartRateBeltFinder*)manager receivedHRUpdate:(NSNumber*)heartRate
 {
+  NSLog(@"HR update: %@", heartRate);
   self.heartRateLabel.text = heartRate.stringValue;
+}
+
+
+- (void)bluetoothAvailableAgain
+{
+  self.heartRateBeltState.numberOfLines = 1;
+  self.heartRateBeltState.text = @"Searching";
+  [self.heartRateBeltState sizeToFit];
+  
+  NSLog(@"Bluetooth available again");
+  SFHeartRateBeltFinder* hrManager = [SFHeartRateBeltFinder sharedHeartRateBeltManager];
+  [hrManager connectToHeartRateBelt:nil timeout:0];
 }
 
 
