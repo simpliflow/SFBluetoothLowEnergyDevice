@@ -8,7 +8,7 @@
 
 
 #define CONNECT_TIMEOUT 1.5
-#define SCAN_FOR_ALTERNATES_TIMEOUT 4
+#define SCAN_FOR_ALTERNATES_TIMEOUT 2
 
 #import "SFBluetoothSmartDeviceManager.h"
 #import "SpacemanBlocks.h"
