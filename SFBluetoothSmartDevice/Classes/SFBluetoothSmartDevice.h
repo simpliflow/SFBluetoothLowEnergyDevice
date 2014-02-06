@@ -18,7 +18,9 @@
 // Error codes for NSErrors, domain is "SFBluetoothSmartDevice"
 typedef NS_ENUM(NSInteger, SFBluetoothSmartError) {
   SFBluetoothSmartErrorUnableToDistinguishClosestDevice = 0,
+  // TODO: should only be sent when searching for specific device
   SFBluetoothSmartErrorProblemsInConnectionProcess,
+  // TODO: should only be sent when searching for specific device
   SFBluetoothSmartErrorProblemsInDiscoveryProcess,
   SFBluetoothSmartErrorConnectionClosedByDevice,
   SFBluetoothSmartErrorUnknown
@@ -57,7 +59,7 @@ typedef NS_ENUM(NSInteger, SFBluetoothSmartError) {
 
 @protocol SFBluetoothSmartDeviceDelegate
 - (void)BTSmartDeviceConnectedSuccessfully:(SFBluetoothSmartDevice*)device;
-/// Although the error is encountered search for the device does not stop. If the connection
+/// Although the error is encountered, search for the device does not stop. If the connection
 /// has been lost it is tried to reconnect (again: either to the device with the specified identifier or the nearest one).
 - (void)BTSmartDeviceEncounteredError:(NSError*)error;
 - (void)BTSmartDevice:(SFBluetoothSmartDevice*)device receivedData:(NSData*)data fromCharacteristic:(CBUUID*)uuid;
