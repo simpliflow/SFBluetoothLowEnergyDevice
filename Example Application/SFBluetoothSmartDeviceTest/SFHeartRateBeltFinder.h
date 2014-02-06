@@ -27,7 +27,7 @@ typedef NS_ENUM(NSInteger, SFHRError) {
 
 
 
-@interface SFHeartRateBeltFinder : NSObject <SFBluetoothSmartDeviceDelegate>
+@interface SFHeartRateBeltFinder : NSObject <SFBluetoothSmartDeviceDelegate, CBCentralManagerDelegate>
 
 CWL_DECLARE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHeartRateBeltManager)
 

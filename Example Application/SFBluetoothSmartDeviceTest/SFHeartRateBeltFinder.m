@@ -33,6 +33,8 @@ static NSString* kBleCharHeartRateMeasurement = @"2A37";
 @property (nonatomic) NSTimeInterval timeout;
 @property (nonatomic) NSTimer* findTimer;
 @property (nonatomic) BOOL hrBeltHasBeenConnected;
+@property (nonatomic) CBCentralManager* bluetoothStatusTracker;
+@property (nonatomic) BOOL bluetoothDidBecomeNotAvailable;
 @end
 
 
@@ -46,6 +48,7 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHe
 {
   if (self = [super init]) {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:@"UIApplicationWillTerminateNotification" object:nil];
+    _bluetoothStatusTracker = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
   }
   return self;
 }
@@ -237,9 +240,9 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHe
 {
   [self.findTimer invalidate];
   self.findTimer = nil;
-
-  // do not set HR belt to nil or otherwise you would not get an update when Bluetooth becomes
-  // available again
+  self.bluetoothDidBecomeNotAvailable = YES;
+  
+  self.heartRateBelt = nil;
   if (self.hrBeltHasBeenConnected) {
     [self.delegate manager:self disconnectedWithError:[self error:SFHRErrorNoBluetooth]];
   }
@@ -249,11 +252,29 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHe
 }
 
 
+// has no effect, since on bluetooth going not available the bluetooth device is deallocated! (there
+// fore the own cbcentralmanager)
 - (void)fixedNoBluetooth
 {
-  self.heartRateBelt = nil;
+  NSLog(@"Bluetooth available again. This should not be called!!");
   [self.delegate bluetoothAvailableAgain];
 }
+
+
+
+
+#pragma mark -
+#pragma mark CBCentralManagerDelegate
+
+
+- (void)centralManagerDidUpdateState:(CBCentralManager*)central
+{
+  if (central.state == CBCentralManagerStatePoweredOn && self.bluetoothDidBecomeNotAvailable) {
+    self.bluetoothDidBecomeNotAvailable = NO;
+    [self.delegate bluetoothAvailableAgain];
+  }
+}
+
 
 
 @end
