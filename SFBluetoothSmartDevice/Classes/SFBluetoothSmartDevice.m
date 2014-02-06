@@ -106,9 +106,6 @@ static dispatch_queue_t __bleManagerQueue;
     self.advertisingServices = services;
     _servicesAndCharacteristics = servicesAndCharacteristics;
     
-    _deviceManager = [SFBluetoothSmartDeviceManager deviceManager];
-    _deviceManager.delegate = self;
-    
     [self connect];
   }
   return self;
@@ -117,6 +114,8 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)connect
 {
+  self.deviceManager = [SFBluetoothSmartDeviceManager deviceManager];
+  self.deviceManager.delegate = self;
   self.shouldConnect = YES;
   [self executeConnectDuties];
 }
@@ -133,6 +132,8 @@ static dispatch_queue_t __bleManagerQueue;
 {
   self.shouldConnect = NO;
   [self executeDisconnectDuties];
+  self.deviceManager.delegate = nil;
+  self.deviceManager = nil;
 }
 - (void)executeDisconnectDuties
 {
