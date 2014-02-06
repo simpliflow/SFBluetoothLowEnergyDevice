@@ -13,8 +13,7 @@
 // Insert these to test if the BLE device really calls every method on the main thread, the internal
 // ble-queue should not leak.
 #define ASSERT_MAIN_THREAD NSAssert([[NSThread currentThread] isMainThread], @"Is not on main tread, but should be");
-
-
+#define DEFAULT_FIND_TIMEOUT 10
 
 
 // Services
@@ -28,12 +27,14 @@ static NSString* kBleCharHeartRateMeasurement = @"2A37";
 
 
 
+
+
 @interface SFHeartRateBeltFinder ()
-@property (readwrite) SInt8 batteryPercentageOfConnectedBelt;
-@property (readwrite) SFBluetoothSmartDevice* heartRateBelt;
+@property (nonatomic) SFBluetoothSmartDevice* heartRateBelt;
+@property (nonatomic) NSTimeInterval timeout;
+@property (nonatomic) NSTimer* findTimer;
+@property (nonatomic) BOOL hrBeltHasBeenConnected;
 @end
-
-
 
 
 @implementation SFHeartRateBeltFinder
@@ -54,87 +55,90 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHe
 
 - (void)applicationWillTerminate:(NSNotification*)notification
 {
-  [self disconnect];
+  [self disconnectFromHeartRateBelt];
 }
 
 
 
 
 #pragma mark -
-#pragma mark Public
+#pragma mark Public Methods
 
 
-- (void)startSearch
+- (void)connectToHeartRateBelt:(NSUUID*)beltIdentifier timeout:(NSTimeInterval)timeout;
 {
   // Ignore if already trying to connect
   if (self.heartRateBelt) {
     return;
   }
   
-  // Create the dictionary that represents the services and characteristics that
-  // you want to work with when connected to the BLE device
+  if (timeout >= 0)
+    self.timeout = timeout;
+  else
+    self.timeout = DEFAULT_FIND_TIMEOUT;
+  
+  self.hrBeltHasBeenConnected = NO;
+
   NSDictionary* heartBeltServicesAndCharacteristics = @{
-                                                        CBUUIDMake(kBleServiceHeartRate):
-                                                          @[ CBUUIDMake(kBleCharHeartRateMeasurement) ],
-                                                        
-                                                        CBUUIDMake(kBleServiceBattery):
-                                                          @[ CBUUIDMake(kBleCharBatteryLevel) ]
+                                                        CBUUIDMake(kBleServiceHeartRate) : @[CBUUIDMake(kBleCharHeartRateMeasurement)],
+                                                        CBUUIDMake(kBleServiceBattery) : @[CBUUIDMake(kBleCharBatteryLevel)]
                                                         };
-  
-  // Only include the services the BLE device is expected to advertise
-  NSArray* heartBeltAdvertisingServices = @[ CBUUIDMake(kBleServiceHeartRate) ];
-  
-  // Creating the BLE device automatically starts the scan of the CBCentralManager
-  // Since we don't care about any specific belt, we just set the identifier to nil. Providing an NSUUID here
-  // would only connect the heart rate belt object to that specific BLE device (Note: the NSUUID of the same
-  // BLE device is different on every iOS device).
+  NSArray* heartBeltAdvertisingServices = @[CBUUIDMake(kBleServiceHeartRate)];
   self.heartRateBelt = [SFBluetoothSmartDevice withTheseServicesAndCharacteristics:heartBeltServicesAndCharacteristics
                                                                        advertising:heartBeltAdvertisingServices
-                                                          andIdentifyingItselfWith:nil];
+                                                          andIdentifyingItselfWith:beltIdentifier];
+  self.findTimer = [NSTimer scheduledTimerWithTimeInterval:self.timeout target:self selector:@selector(findTimedOut:) userInfo:nil repeats:NO];
 }
 
 
-- (void)disconnect
+- (SInt8)batteryPercentageOfConnectedBelt
 {
-  // When the BLE device is deallocated it will all BLE-operations concerned with it will be cancelled
-  // automatically
+  if (self.heartRateBelt.connected)
+    return self.heartRateBelt.batteryLevel;
+  else
+    return -1;
+}
+
+
+- (void)disconnectFromHeartRateBelt
+{
   self.heartRateBelt = nil;
 }
 
 
 
 
-#pragma mark -
-#pragma mark Private
+#pragma mark Private Methods
 
 
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
 {
-  ASSERT_MAIN_THREAD
-  
-  if ([keyPath isEqualToString:@"connected"]) {
-    if (self.heartRateBelt.connected) {
-      [self.delegate manager:self connectedToHeartRateBelt:self.heartRateBelt.identifier];
-      [self.heartRateBelt subscribeToCharacteristic:CBUUIDMake(kBleCharHeartRateMeasurement)];
-    }
-    else {
-      [self disconnectedFromBelt];
-    }
-  }
-  else if ([keyPath isEqualToString:@"error"]) {
-    NSLog(@"Registered error: %@", self.heartRateBelt.error.localizedDescription);
-    self.heartRateBelt = nil;
-    [self.delegate managerFailedToConnectToHRBelt:self];
-  }
-  else if ([keyPath isEqualToString:@"batteryLevel"]) {
-    self.batteryPercentageOfConnectedBelt = self.heartRateBelt.batteryLevel;
+  if ([keyPath isEqualToString:@"batteryLevel"]) {
+    [self willChangeValueForKey:@"batteryPercentageOfConnectedBelt"];
+    [self didChangeValueForKey:@"batteryPercentageOfConnectedBelt"];
   }
 }
 
 
-- (void)disconnectedFromBelt
+// This method is only called if the specific belt (or no belt at all if specificHRBelt is nil)
+// has been found within the timeout time span.
+- (void)findTimedOut:(NSTimer*)timer
 {
-  self.batteryPercentageOfConnectedBelt = -1;
+  if (self.heartRateBelt.connected) {
+    // For this to happen, it is necessary that the timer runs out in exactly the same moment
+    // as the connection is successfully established and observereValue... has not yet reached
+    // the line where the timer is invalidated.
+    // It is unclear if this can happen, or if the methods are run atomically on a single thread.
+    // This is definitely worth reporting to analytics
+    NSLog(@"ERROR: Heart rate belt is connected although the find process timed out.");
+    // TODO: add analytics reporting of this condition
+    return;
+  }
+  
+  NSLog(@"Search for belt timed out.");
+  
+  self.heartRateBelt = nil;
+  [self.delegate manager:self failedToConnectWithError:[self error:SFHRErrorNoDeviceFound]];
 }
 
 
@@ -146,36 +150,42 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHe
   [_heartRateBelt disconnect];
   _heartRateBelt.delegate = nil;
   [_heartRateBelt removeObserver:self forKeyPath:@"batteryLevel"];
-  [_heartRateBelt removeObserver:self forKeyPath:@"connected"];
-  [_heartRateBelt removeObserver:self forKeyPath:@"error"];
   
   _heartRateBelt = heartRateBelt;
   
   _heartRateBelt.delegate = self;
   [_heartRateBelt addObserver:self forKeyPath:@"batteryLevel" options:0 context:nil];
-  [_heartRateBelt addObserver:self forKeyPath:@"connected" options:0 context:nil];
-  [_heartRateBelt addObserver:self forKeyPath:@"error" options:0 context:nil];
+}
+
+
+- (NSError*)error:(SFHRError)errorCode
+{
+  return [NSError errorWithDomain:@"SFHRError"
+                             code:errorCode
+                         userInfo:@{
+                                    NSLocalizedDescriptionKey: @"Error happened"
+                                    }];
 }
 
 
 
 
-#pragma mark -
 #pragma mark SFBluetoothSmartDeviceDelegate
 
 
-- (BOOL)shouldContinueSearch
+- (void)BTSmartDeviceConnectedSuccessfully:(SFBluetoothSmartDevice*)device
 {
-  ASSERT_MAIN_THREAD
-  
-  return YES;
+  [self.findTimer invalidate];
+  self.findTimer = nil;
+  self.hrBeltHasBeenConnected = YES;
+  SFBluetoothSmartDevice* hrBelt = self.heartRateBelt;
+  [self.delegate manager:self connectedToHeartRateBelt:hrBelt.identifier name:hrBelt.name];
+  [hrBelt subscribeToCharacteristic:CBUUIDMake(kBleCharHeartRateMeasurement)];
 }
 
 
 - (void)BTSmartDevice:(SFBluetoothSmartDevice*)device receivedData:(NSData*)data fromCharacteristic:(CBUUID*)uuid
 {
-  ASSERT_MAIN_THREAD
-  
   if ([uuid isEqual:CBUUIDMake(kBleCharHeartRateMeasurement)]) {
     UInt8 heartRate;
     [data getBytes:&heartRate range:NSMakeRange(1, 1)];
@@ -184,6 +194,69 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHe
 }
 
 
+- (void)BTSmartDeviceEncounteredError:(NSError*)error
+{
+  NSError* hrError = nil;
+  BOOL abortFind = YES;
+  switch (error.code) {
+    case SFBluetoothSmartErrorUnableToDistinguishClosestDevice:
+      hrError = [self error:SFHRErrorUnableToDistinguishSingleDevice];
+      break;
+    case SFBluetoothSmartErrorProblemsInConnectionProcess:
+      hrError = [self error:SFHRErrorUnknown];
+      abortFind = NO;
+      break;
+    case SFBluetoothSmartErrorProblemsInDiscoveryProcess:
+      hrError = [self error:SFHRErrorUnknown];
+      abortFind = NO;
+      break;
+    case SFBluetoothSmartErrorConnectionClosedByDevice:
+      hrError = [self error:SFHRErrorUnknown];
+      break;
+    case SFBluetoothSmartErrorUnknown:
+      hrError = [self error:SFHRErrorUnknown];
+      abortFind = NO;
+      break;
+  }
+  
+  if (abortFind) {
+    [self.findTimer invalidate];
+    self.findTimer = nil;
+    self.heartRateBelt = nil;
+    if (self.hrBeltHasBeenConnected) {
+      [self.delegate manager:self disconnectedWithError:hrError];
+      self.hrBeltHasBeenConnected = NO;
+    }
+    else {
+      [self.delegate manager:self failedToConnectWithError:hrError];
+    }
+  }
+}
+
+
+- (void)noBluetooth
+{
+  [self.findTimer invalidate];
+  self.findTimer = nil;
+
+  self.heartRateBelt = nil;
+  if (self.hrBeltHasBeenConnected) {
+    [self.delegate manager:self disconnectedWithError:[self error:SFHRErrorNoBluetooth]];
+  }
+  else {
+    [self.delegate manager:self failedToConnectWithError:[self error:SFHRErrorNoBluetooth]];
+  }
+}
+
+
+- (void)fixedNoBluetooth
+{
+  [self.delegate bluetoothAvailableAgain];
+}
+
+
 @end
 
+#undef DISPATCH_ON_MAIN_QUEUE
 #undef CBUUIDMake
+#undef DEFAULT_FIND_TIMEOUT
