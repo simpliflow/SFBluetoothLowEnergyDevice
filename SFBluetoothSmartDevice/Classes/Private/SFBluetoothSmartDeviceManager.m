@@ -47,6 +47,9 @@
 
 @property (nonatomic) BOOL connectionAttemptHasTimedOutBefore;
 
+// Dict to hold the peripherals' RSSIs during scanning for alternatives.
+// Peripherals are the keys, RSSIs are saved to a mutable array, after
+// scanning has finished the average is calculated.
 @property (nonatomic) NSMutableDictionary* discoveredPeripherals;
 
 
@@ -189,6 +192,10 @@ static NSArray* __managerStateStrings;
 
 - (void)centralHasDiscoveredPeripheral:(CBPeripheral*)peripheral RSSI:(NSNumber*)RSSI
 {
+  // An RSSI value of 127 is not valid, but it has been encountered regularly
+  if (RSSI.integerValue == 127)
+    return;
+  
   if ([self.identifierToSearchFor isEqual:peripheral.identifier]) {
     [self stopScan];
     
@@ -201,10 +208,14 @@ static NSArray* __managerStateStrings;
     if (self.discoveredPeripherals.count == 0) {
       [self startScanForAlternatesTimer];
     }
-    
-    self.discoveredPeripherals[peripheral] = RSSI;
-    
     // NSLog(@"BLE-Manager: Did discover suitable peripheral %@ with RSSI %@", peripheral, RSSI);
+    if (![self.discoveredPeripherals.allKeys containsObject:peripheral]) {
+      self.discoveredPeripherals[peripheral] = [@[RSSI] mutableCopy];
+    }
+    else {
+      NSMutableArray* RSSIs = self.discoveredPeripherals[peripheral];
+      [RSSIs addObject:RSSI];
+    }
   }
   else {
     // NSLog(@"BLE-Manager: Did discover unsuitable peripheral: %@", peripheral);
@@ -225,19 +236,23 @@ static NSArray* __managerStateStrings;
   // NSLog(@"BLE-Manager: Finished scanning for alternates, found %d peripherals.", self.discoveredDevices.count);
   [self stopScan];
   [self invalidateScanForAlternativesTimer];
+  NSMutableDictionary* discoveredPerphs = self.discoveredPeripherals;
   
+  // Calculate the average of all RSSIs and sort the peripherals by result
+  for (NSString* peripheral in discoveredPerphs.allKeys) {
+    discoveredPerphs[peripheral] = [discoveredPerphs[peripheral] valueForKeyPath:@"@avg.self"];
+  }
+  NSArray* sortedPeripherals = [discoveredPerphs keysSortedByValueUsingComparator:^(NSNumber* RSSI1, NSNumber* RSSI2){return [RSSI1 compare:RSSI2];}];
+  
+  // Check if the first two are very close or take the first one
   CBPeripheral* peripheralWithStrongestRSSI = nil;
-  NSArray* sortedPeripherals = [self.discoveredPeripherals keysSortedByValueUsingComparator:^(NSNumber* RSSI1, NSNumber* RSSI2){return [RSSI1 compare:RSSI2];}];
-  
-  if (self.discoveredPeripherals.count > 1) {
-    NSNumber* bestRSSI = self.discoveredPeripherals[sortedPeripherals[0]];
-    NSNumber* secondBestRSSI = self.discoveredPeripherals[sortedPeripherals[1]];
+  if (discoveredPerphs.count > 1) {
+    NSNumber* bestRSSI = discoveredPerphs[sortedPeripherals[0]];
+    NSNumber* secondBestRSSI = discoveredPerphs[sortedPeripherals[1]];
     if (bestRSSI.floatValue - secondBestRSSI.floatValue < RSSI_DIFFERENCE_THRESHOLD) {
-      // report "undistinguishable"-error
       [self.delegate managerFailedToConnectToSuitablePeripheral:self error:[SFBluetoothSmartDeviceManager error:SFBluetoothSmartErrorUnableToDistinguishClosestDevice]];
       [self startScan];
       return;
-      // return
     }
   }
   
