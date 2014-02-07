@@ -68,8 +68,8 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
 
 - (void)connectToHeartRateBelt:(NSUUID*)beltIdentifier timeout:(NSTimeInterval)timeout;
 {
-  // Ignore if already trying to connect
   if (self.heartRateBelt) {
+    [self.heartRateBelt linkWithIdentifier:beltIdentifier];
     return;
   }
   
@@ -85,9 +85,9 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
                                                         CBUUIDMake(kBleServiceBattery) : @[CBUUIDMake(kBleCharBatteryLevel)]
                                                         };
   NSArray* heartBeltAdvertisingServices = @[CBUUIDMake(kBleServiceHeartRate)];
-  self.heartRateBelt = [SFBluetoothSmartDevice withTheseServicesAndCharacteristics:heartBeltServicesAndCharacteristics
-                                                                       advertising:heartBeltAdvertisingServices
-                                                          andIdentifyingItselfWith:beltIdentifier];
+  self.heartRateBelt = [SFBluetoothSmartDevice BTSmartDeviceWithServicesAndCharacteristics:heartBeltServicesAndCharacteristics
+                                                                       advertising:heartBeltAdvertisingServices];
+  [self.heartRateBelt linkWithIdentifier:beltIdentifier];
   if (self.timeout)
     self.findTimer = [NSTimer scheduledTimerWithTimeInterval:self.timeout target:self selector:@selector(findTimedOut:) userInfo:nil repeats:NO];
 }
@@ -95,16 +95,16 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
 
 - (SInt8)batteryPercentageOfConnectedBelt
 {
-  if (self.heartRateBelt.connected)
-    return self.heartRateBelt.batteryLevel;
-  else
+//  if (self.heartRateBelt.linked)
+//    return self.heartRateBelt.batteryLevel;
+//  else
     return -1;
 }
 
 
 - (void)disconnectFromHeartRateBelt
 {
-  self.heartRateBelt = nil;
+  [self.heartRateBelt unlink];
 }
 
 
@@ -126,20 +126,9 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
 // has been found within the timeout time span.
 - (void)findTimedOut:(NSTimer*)timer
 {
-  if (self.heartRateBelt.connected) {
-    // For this to happen, it is necessary that the timer runs out in exactly the same moment
-    // as the connection is successfully established and observereValue... has not yet reached
-    // the line where the timer is invalidated.
-    // It is unclear if this can happen, or if the methods are run atomically on a single thread.
-    // This is definitely worth reporting to analytics
-    NSLog(@"ERROR: Heart rate belt is connected although the find process timed out.");
-    // TODO: add analytics reporting of this condition
-    return;
-  }
+  NSLog(@"HR-Mgr: Search for belt timed out.");
   
-  NSLog(@"Search for belt timed out.");
-  
-  self.heartRateBelt = nil;
+  [self.heartRateBelt unlink];
   [self.delegate manager:self failedToConnectWithError:[self error:SFHRErrorNoDeviceFound]];
 }
 
@@ -149,7 +138,7 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
   if (_heartRateBelt == heartRateBelt)
     return;
   
-  [_heartRateBelt disconnect];
+  [_heartRateBelt unlink];
   _heartRateBelt.delegate = nil;
   [_heartRateBelt removeObserver:self forKeyPath:@"batteryLevel"];
   
@@ -177,6 +166,7 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
 
 - (void)BTSmartDeviceConnectedSuccessfully:(SFBluetoothSmartDevice*)device
 {
+  NSLog(@"HR-Mgr: device connected successfully");
   [self.findTimer invalidate];
   self.findTimer = nil;
   self.hrBeltHasBeenConnected = YES;
@@ -198,6 +188,7 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
 
 - (void)BTSmartDeviceEncounteredError:(NSError*)error
 {
+  NSLog(@"HR-Mgr: bt-device reported error (%@ %d: %@)", error.domain, error.code, error.localizedDescription);
   NSError* hrError = nil;
   BOOL abortFind = YES;
   switch (error.code) {
@@ -224,7 +215,7 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
   if (abortFind) {
     [self.findTimer invalidate];
     self.findTimer = nil;
-    self.heartRateBelt = nil;
+    [self.heartRateBelt unlink];
     if (self.hrBeltHasBeenConnected) {
       [self.delegate manager:self disconnectedWithError:hrError];
       self.hrBeltHasBeenConnected = NO;
@@ -238,11 +229,12 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
 
 - (void)noBluetooth
 {
+  NSLog(@"HR-Mgr: no Bluetooth");
   [self.findTimer invalidate];
   self.findTimer = nil;
   self.bluetoothDidBecomeNotAvailable = YES;
   
-  self.heartRateBelt = nil;
+  [self.heartRateBelt unlink];
   if (self.hrBeltHasBeenConnected) {
     [self.delegate manager:self disconnectedWithError:[self error:SFHRErrorNoBluetooth]];
   }
@@ -256,7 +248,7 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
 // fore the own cbcentralmanager)
 - (void)fixedNoBluetooth
 {
-  NSLog(@"Bluetooth available again. This should not be called!!");
+  NSLog(@"HR-Mgr: Bluetooth available again. This should not be called!!");
   [self.delegate bluetoothAvailableAgain];
 }
 

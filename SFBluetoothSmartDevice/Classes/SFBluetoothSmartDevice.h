@@ -22,19 +22,22 @@
 
 @interface SFBluetoothSmartDevice : NSObject <CBPeripheralDelegate, SFBluetoothSmartDeviceManagerDelegate>
 
-+ (instancetype)withTheseServicesAndCharacteristics:(NSDictionary*)servicesAndCharacteristics advertising:(NSArray*)services andIdentifyingItselfWith:(NSUUID*)identifier;
++ (instancetype)BTSmartDeviceWithServicesAndCharacteristics:(NSDictionary*)servicesAndCharacteristics advertising:(NSArray*)services;
 
 @property (nonatomic, assign) NSObject<SFBluetoothSmartDeviceDelegate>* delegate;
 
 
-@property (nonatomic, readonly) BOOL connected;
+/// # Connection management
+/// (the connection process to a BLE device is more involved, therefore
+/// it is named "link")
+- (void)linkWithIdentifier:(NSUUID*)identifier;
+- (void)unlink;
+
 
 @property (nonatomic, readonly) NSString* name;
 @property (nonatomic, readonly) NSUUID* identifier;
 /// Battery level of device in percent (100 is fully charged, 0 is fully discharged)
 @property (nonatomic, readonly) UInt8 batteryLevel;
-
-- (void)disconnect;
 
 - (void)readValueForCharacteristic:(CBUUID*)characteristicUUID;
 - (void)subscribeToCharacteristic:(CBUUID*)characteristicUUID;
