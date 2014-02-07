@@ -147,7 +147,7 @@ static NSArray* __managerStateStrings;
     else {
       self.findProcessShouldRun = NO;
       [self stopScan];
-      [self cancelScanForAlternativesTimer];
+      [self invalidateScanForAlternativesTimer];
       [self invalidateConnectTimer];
     }
   });
@@ -211,7 +211,7 @@ static NSArray* __managerStateStrings;
 {
   // NSLog(@"BLE-Manager: Finished scanning for alternates, found %d peripherals.", self.discoveredDevices.count);
   [self stopScan];
-  [self cancelScanForAlternativesTimer];
+  [self invalidateScanForAlternativesTimer];
   
   NSNumber* strongestRSSI = [self.discoveredDevices.allKeys valueForKeyPath:@"@max.intValue"];
   CBPeripheral* peripheralWithStrongestRSSI = self.discoveredDevices[strongestRSSI];
@@ -220,8 +220,8 @@ static NSArray* __managerStateStrings;
   [self connectToSuitablePeripheral];
 }
 
-// TODO: rename to "invalidate..."
-- (void)cancelScanForAlternativesTimer
+
+- (void)invalidateScanForAlternativesTimer
 {
   if (_scanForAlternatesTimeoutBlock) {
     cancel_delayed_block(_scanForAlternatesTimeoutBlock);
@@ -315,7 +315,7 @@ static NSArray* __managerStateStrings;
       [self.bleManager cancelPeripheralConnection:self.suitablePeripheral];
     
     self.suitablePeripheral = nil;
-    [self cancelScanForAlternativesTimer];
+    [self invalidateScanForAlternativesTimer];
     
     if ([self.delegate respondsToSelector:@selector(bluetoothNotAvailable)])
       [self.delegate bluetoothNotAvailable];
