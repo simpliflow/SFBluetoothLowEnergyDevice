@@ -9,6 +9,7 @@
 
 #define CONNECT_TIMEOUT 1.5
 #define SCAN_FOR_ALTERNATES_TIMEOUT 2
+#define RSSI_DIFFERENCE_THRESHOLD 10
 
 #import "SFBluetoothSmartDeviceManager.h"
 #import "SpacemanBlocks.h"
@@ -46,7 +47,7 @@
 
 @property (nonatomic) BOOL connectionAttemptHasTimedOutBefore;
 
-@property (nonatomic) NSMutableDictionary* discoveredDevices;
+@property (nonatomic) NSMutableDictionary* discoveredPeripherals;
 
 
 // State of Bluetooth
@@ -180,7 +181,7 @@ static NSArray* __managerStateStrings;
   if (self.findProcessShouldRun && self.shouldScan && self.bleManager.state == CBCentralManagerStatePoweredOn) {
     // NSLog(@"BLE-Manager: Starting scan for suitable devices");
     self.connectionAttemptHasTimedOutBefore = NO;
-    self.discoveredDevices = [@{} mutableCopy];
+    self.discoveredPeripherals = [@{} mutableCopy];
     [self.bleManager scanForPeripheralsWithServices:self.servicesToSearchFor options:@{CBCentralManagerScanOptionAllowDuplicatesKey : @YES}];
   }
 }
@@ -197,11 +198,11 @@ static NSArray* __managerStateStrings;
     [self connectToSuitablePeripheral];
   }
   else if (!self.identifierToSearchFor) {
-    if (self.discoveredDevices.count == 0) {
+    if (self.discoveredPeripherals.count == 0) {
       [self startScanForAlternatesTimer];
     }
     
-    self.discoveredDevices[RSSI] = peripheral;
+    self.discoveredPeripherals[peripheral] = RSSI;
     
     // NSLog(@"BLE-Manager: Did discover suitable peripheral %@ with RSSI %@", peripheral, RSSI);
   }
@@ -225,8 +226,22 @@ static NSArray* __managerStateStrings;
   [self stopScan];
   [self invalidateScanForAlternativesTimer];
   
-  NSNumber* strongestRSSI = [self.discoveredDevices.allKeys valueForKeyPath:@"@max.intValue"];
-  CBPeripheral* peripheralWithStrongestRSSI = self.discoveredDevices[strongestRSSI];
+  CBPeripheral* peripheralWithStrongestRSSI = nil;
+  NSArray* sortedPeripherals = [self.discoveredPeripherals keysSortedByValueUsingComparator:^(NSNumber* RSSI1, NSNumber* RSSI2){return [RSSI1 compare:RSSI2];}];
+  
+  if (self.discoveredPeripherals.count > 1) {
+    NSNumber* bestRSSI = self.discoveredPeripherals[sortedPeripherals[0]];
+    NSNumber* secondBestRSSI = self.discoveredPeripherals[sortedPeripherals[1]];
+    if (bestRSSI.floatValue - secondBestRSSI.floatValue < RSSI_DIFFERENCE_THRESHOLD) {
+      // report "undistinguishable"-error
+      [self.delegate managerFailedToConnectToSuitablePeripheral:self error:[SFBluetoothSmartDeviceManager error:SFBluetoothSmartErrorUnableToDistinguishClosestDevice]];
+      [self startScan];
+      return;
+      // return
+    }
+  }
+  
+  peripheralWithStrongestRSSI = sortedPeripherals[0];
   self.suitablePeripheral = peripheralWithStrongestRSSI;
   
   [self connectToSuitablePeripheral];
@@ -300,7 +315,7 @@ static NSArray* __managerStateStrings;
   [self startScan];
 }
 
-
+                                                                            
 
 
 #pragma CBCentralManagerDelegate
@@ -382,9 +397,10 @@ static NSArray* __managerStateStrings;
   self.shouldScan = YES;
   [self startScan];
 }
-
-
+                                                                            
+                                                                            
 @end
 
+#undef RSSI_DIFFERENCE_THRESHOLD
 #undef SCAN_FOR_ALTERNATES_TIMEOUT
 #undef CONNECT_TIMEOUT

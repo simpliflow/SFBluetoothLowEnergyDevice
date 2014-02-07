@@ -290,7 +290,12 @@ static dispatch_queue_t __bleManagerQueue;
 {
   DISPATCH_ON_MAIN_QUEUE(
                          self.connected = NO;
-                         [self.delegate BTSmartDeviceEncounteredError:[SFBluetoothSmartDeviceManager error:SFBluetoothSmartErrorProblemsInConnectionProcess]];
+                         if (error.code == SFBluetoothSmartErrorUnableToDistinguishClosestDevice) {
+                           [self.delegate BTSmartDeviceEncounteredError:error];
+                         }
+                         else {
+                           [self.delegate BTSmartDeviceEncounteredError:[SFBluetoothSmartDeviceManager error:SFBluetoothSmartErrorProblemsInConnectionProcess]];
+                         }
 //                         [ARAnalytics error:error withMessage:peripheral.name];
                          )
   // NSLog(@"BLE-Device: central failed to connect");
