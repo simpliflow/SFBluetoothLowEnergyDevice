@@ -15,20 +15,6 @@
 
 
 
-// Error codes for NSErrors, domain is "SFBluetoothSmartDevice"
-typedef NS_ENUM(NSInteger, SFBluetoothSmartError) {
-  SFBluetoothSmartErrorUnableToDistinguishClosestDevice = 0,
-  // TODO: should only be sent when searching for specific device
-  SFBluetoothSmartErrorProblemsInConnectionProcess,
-  // TODO: should only be sent when searching for specific device
-  SFBluetoothSmartErrorProblemsInDiscoveryProcess,
-  SFBluetoothSmartErrorConnectionClosedByDevice,
-  SFBluetoothSmartErrorUnknown
-};
-
-
-
-
 
 
 // Will try to connect until device is found, disconnect is called or it is deallocated (Note: do not rely on deallocation).

@@ -290,7 +290,7 @@ static dispatch_queue_t __bleManagerQueue;
 {
   DISPATCH_ON_MAIN_QUEUE(
                          self.connected = NO;
-                         [self.delegate BTSmartDeviceEncounteredError:[self error:SFBluetoothSmartErrorProblemsInConnectionProcess]];
+                         [self.delegate BTSmartDeviceEncounteredError:[SFBluetoothSmartDeviceManager error:SFBluetoothSmartErrorProblemsInConnectionProcess]];
 //                         [ARAnalytics error:error withMessage:peripheral.name];
                          )
   // NSLog(@"BLE-Device: central failed to connect");
@@ -304,7 +304,7 @@ static dispatch_queue_t __bleManagerQueue;
   [self stopDiscoveryTimer];
   
   if (self.shouldConnect) {
-    DISPATCH_ON_MAIN_QUEUE([self.delegate BTSmartDeviceEncounteredError:[self error:SFBluetoothSmartErrorConnectionClosedByDevice]]);
+    DISPATCH_ON_MAIN_QUEUE([self.delegate BTSmartDeviceEncounteredError:[SFBluetoothSmartDeviceManager error:SFBluetoothSmartErrorConnectionClosedByDevice]]);
     [self executeConnectDuties];
   }
 }
@@ -329,16 +329,6 @@ static dispatch_queue_t __bleManagerQueue;
   if (self.shouldConnect) {
     [self executeConnectDuties];
   }
-}
-
-
-- (NSError*)error:(SFBluetoothSmartError)errorCode
-{
-  return [NSError errorWithDomain:@"SFBluetoothSmartError"
-                             code:errorCode
-                         userInfo:@{
-                                    NSLocalizedDescriptionKey: @"Error happened"
-                                    }];
 }
 
 

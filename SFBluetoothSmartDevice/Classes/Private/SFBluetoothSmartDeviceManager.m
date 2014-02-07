@@ -84,6 +84,18 @@ static NSArray* __managerStateStrings;
 }
 
 
++ (NSError*)error:(SFBluetoothSmartError)errorCode
+{
+  return [NSError errorWithDomain:@"SFBluetoothSmartError"
+                             code:errorCode
+                         userInfo:@{
+                                    NSLocalizedDescriptionKey: @"Error happened"
+                                    }];
+}
+
+
+
+
 + (instancetype)deviceManager
 {
   return [[SFBluetoothSmartDeviceManager alloc] init];

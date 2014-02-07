@@ -12,6 +12,18 @@
 #import <CoreBluetooth/CoreBluetooth.h>
 
 
+// Error codes for NSErrors, domain is "SFBluetoothSmartDevice"
+typedef NS_ENUM(NSInteger, SFBluetoothSmartError) {
+  SFBluetoothSmartErrorUnableToDistinguishClosestDevice = 0,
+  SFBluetoothSmartErrorProblemsInConnectionProcess,
+  SFBluetoothSmartErrorProblemsInDiscoveryProcess,
+  SFBluetoothSmartErrorConnectionClosedByDevice,
+  SFBluetoothSmartErrorUnknown
+};
+
+
+
+
 
 
 @protocol SFBluetoothSmartDeviceManagerDelegate;
@@ -22,6 +34,8 @@
 @interface SFBluetoothSmartDeviceManager : NSObject <CBCentralManagerDelegate>
 
 @property (nonatomic, assign) NSObject<SFBluetoothSmartDeviceManagerDelegate>* delegate;
+
++ (NSError*)error:(SFBluetoothSmartError)errorCode;
 
 + (instancetype)deviceManager;
 
