@@ -121,7 +121,7 @@ static dispatch_queue_t __bleManagerQueue;
 }
 - (void)executeConnectDuties
 {
-  // NSLog(@"BLE-device: connecting (%d)", self.hash);
+  NSLog(@"BLE-device: Starting find (%d)", self.hash);
   self.servicesByUUID = [@{} mutableCopy];
   self.characteristicsByUUID = [@{} mutableCopy];
   [_deviceManager find:self.identifier advertising:self.advertisingServices];
@@ -130,6 +130,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)disconnect
 {
+  NSLog(@"BLE-device: Stopping find (%d)", self.hash);
   self.shouldConnect = NO;
   [self executeDisconnectDuties];
   self.deviceManager.delegate = nil;
@@ -137,7 +138,7 @@ static dispatch_queue_t __bleManagerQueue;
 }
 - (void)executeDisconnectDuties
 {
-  // NSLog(@"BLE-device: disconnecting (%d)", self.hash);
+  NSLog(@"BLE-device: canceling connection (%d)", self.hash);
   [self.deviceManager cancelConnection];
 }
 
@@ -193,7 +194,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)dealloc
 {
-  // NSLog(@"BLE-Device: deallocating (%d)", self.hash);
+  NSLog(@"BLE-Device: deallocating (%d)", self.hash);
   if (self.connected)
     [self disconnect];
 }
@@ -245,6 +246,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)discoveryTimedOut:(NSTimer*)timer
 {
+  NSLog(@"BLE-Device: Discovery timed out");
   [self stopDiscoveryTimer];
 }
 
@@ -298,13 +300,13 @@ static dispatch_queue_t __bleManagerQueue;
                          }
 //                         [ARAnalytics error:error withMessage:peripheral.name];
                          )
-  // NSLog(@"BLE-Device: central failed to connect");
+  NSLog(@"BLE-Device: central failed to connect");
 }
 
 
 - (void)manager:(SFBluetoothSmartDeviceManager*)manager disconnectedFromPeripheral:(CBPeripheral*)peripheral
 {
-  // NSLog(@"BLE-Device: central disconnected from peripheral");
+  NSLog(@"BLE-Device: central disconnected from peripheral");
   DISPATCH_ON_MAIN_QUEUE(self.connected = NO);
   [self stopDiscoveryTimer];
   
@@ -317,7 +319,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)bluetoothNotAvailable
 {
-  // NSLog(@"BLE-Device: Bluetooth not available");
+  NSLog(@"BLE-Device: Bluetooth not available");
   if ([self.delegate respondsToSelector:@selector(noBluetooth)])
     DISPATCH_ON_MAIN_QUEUE([self.delegate noBluetooth]);
   
@@ -327,7 +329,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)bluetoothAvailableAgain
 {
-  // NSLog(@"BLE-Device: Bluetooth no longer not available.");
+  NSLog(@"BLE-Device: Bluetooth no longer not available.");
   if ([self.delegate respondsToSelector:@selector(fixedNoBluetooth)])
     DISPATCH_ON_MAIN_QUEUE([self.delegate fixedNoBluetooth]);
   
@@ -357,7 +359,7 @@ static dispatch_queue_t __bleManagerQueue;
 - (void)peripheral:(CBPeripheral*)peripheral didDiscoverCharacteristicsForService:(CBService*)service error:(NSError*)error
 {
   if (error) {
-    // NSLog(@"error: %@ %@", [error localizedDescription], error);
+    NSLog(@"error: %@ %@", [error localizedDescription], error);
     return;
   }
   
@@ -368,7 +370,7 @@ static dispatch_queue_t __bleManagerQueue;
   if (self.servicesByUUID.count == self.servicesAndCharacteristics.count &&
       self.characteristicsByUUID.count == ((NSArray*)[self.servicesAndCharacteristics.allValues valueForKeyPath:@"@unionOfArrays.self"]).count) {
     [self stopDiscoveryTimer];
-    // NSLog(@"BLE-Device: connect and discovery complete");
+    NSLog(@"BLE-Device: connect and discovery complete");
     DISPATCH_ON_MAIN_QUEUE(self.connected = YES;)
   }
 }
@@ -377,7 +379,7 @@ static dispatch_queue_t __bleManagerQueue;
 - (void)peripheral:(CBPeripheral*)peripheral didUpdateNotificationStateForCharacteristic:(CBCharacteristic*)characteristic error:(NSError*)error
 {
   if (error) {
-    // NSLog(@"error: %@ %@", [error localizedDescription], error);
+    NSLog(@"error: %@ %@", [error localizedDescription], error);
     return;
   }
 }
@@ -386,7 +388,7 @@ static dispatch_queue_t __bleManagerQueue;
 - (void)peripheral:(CBPeripheral*)peripheral didUpdateValueForCharacteristic:(CBCharacteristic*)characteristic error:(NSError*)error
 {
   if (error) {
-    // NSLog(@"error: %@ %@", [error localizedDescription], error);
+    NSLog(@"error: %@ %@", [error localizedDescription], error);
     return;
   }
   
