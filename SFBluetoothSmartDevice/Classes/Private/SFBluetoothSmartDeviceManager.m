@@ -242,7 +242,7 @@ static NSArray* __managerStateStrings;
   for (NSString* peripheral in discoveredPerphs.allKeys) {
     discoveredPerphs[peripheral] = [discoveredPerphs[peripheral] valueForKeyPath:@"@avg.self"];
   }
-  NSArray* sortedPeripherals = [discoveredPerphs keysSortedByValueUsingComparator:^(NSNumber* RSSI1, NSNumber* RSSI2){return [RSSI1 compare:RSSI2];}];
+  NSArray* sortedPeripherals = [discoveredPerphs keysSortedByValueUsingComparator:^(NSNumber* RSSI1, NSNumber* RSSI2){return [RSSI2 compare:RSSI1];}];
   
   // Check if the first two are very close or take the first one
   CBPeripheral* peripheralWithStrongestRSSI = nil;
