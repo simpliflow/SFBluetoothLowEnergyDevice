@@ -153,15 +153,14 @@ static NSArray* __managerStateStrings;
 {
   // NSLog(@"BLE-Manager: Cancelling connection");
   dispatch_async(self.bleManagerQueue, ^{
+    self.findProcessShouldRun = NO;
     if (self.suitablePeripheral) {
-      self.findProcessShouldRun = NO;
       if (self.bleManager.state == CBCentralManagerStatePoweredOn)
         [self.bleManager cancelPeripheralConnection:self.suitablePeripheral];
       self.suitablePeripheral = nil;
       [self invalidateConnectTimer];
     }
     else {
-      self.findProcessShouldRun = NO;
       [self stopScan];
       [self invalidateScanForAlternativesTimer];
       [self invalidateConnectTimer];
