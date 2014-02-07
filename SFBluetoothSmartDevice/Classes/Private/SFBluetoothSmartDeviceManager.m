@@ -329,8 +329,11 @@ static NSArray* __managerStateStrings;
   
   [self.delegate managerFailedToConnectToSuitablePeripheral:self error:nil];
   self.suitablePeripheral = nil;
-  self.shouldScan = YES;
-  [self startScan];
+  
+  if (self.findProcessShouldRun) {
+    self.shouldScan = YES;
+    [self startScan];
+  }
 }
 
                                                                             

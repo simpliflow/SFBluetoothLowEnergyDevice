@@ -248,6 +248,7 @@ static dispatch_queue_t __bleManagerQueue;
 {
   NSLog(@"BLE-Device: Discovery timed out");
   [self stopDiscoveryTimer];
+  [self executeDisconnectDuties];
 }
 
 
