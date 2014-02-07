@@ -23,7 +23,7 @@
 		29EC9FA61896BE1200C9CF72 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29EC9F851896BE1200C9CF72 /* UIKit.framework */; };
 		29EC9FAE1896BE1200C9CF72 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 29EC9FAC1896BE1200C9CF72 /* InfoPlist.strings */; };
 		29EC9FB01896BE1200C9CF72 /* SFBluetoothSmartDeviceTestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 29EC9FAF1896BE1200C9CF72 /* SFBluetoothSmartDeviceTestTests.m */; };
-		29EC9FBB1897BC3500C9CF72 /* SFHeartRateBeltFinder.m in Sources */ = {isa = PBXBuildFile; fileRef = 29EC9FBA1897BC3500C9CF72 /* SFHeartRateBeltFinder.m */; };
+		29EC9FBB1897BC3500C9CF72 /* SFHeartRateBeltManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 29EC9FBA1897BC3500C9CF72 /* SFHeartRateBeltManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,8 +57,8 @@
 		29EC9FAB1896BE1200C9CF72 /* SFBluetoothSmartDeviceTestTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "SFBluetoothSmartDeviceTestTests-Info.plist"; sourceTree = "<group>"; };
 		29EC9FAD1896BE1200C9CF72 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		29EC9FAF1896BE1200C9CF72 /* SFBluetoothSmartDeviceTestTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SFBluetoothSmartDeviceTestTests.m; sourceTree = "<group>"; };
-		29EC9FB91897BC3500C9CF72 /* SFHeartRateBeltFinder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFHeartRateBeltFinder.h; sourceTree = "<group>"; };
-		29EC9FBA1897BC3500C9CF72 /* SFHeartRateBeltFinder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFHeartRateBeltFinder.m; sourceTree = "<group>"; };
+		29EC9FB91897BC3500C9CF72 /* SFHeartRateBeltManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFHeartRateBeltManager.h; sourceTree = "<group>"; };
+		29EC9FBA1897BC3500C9CF72 /* SFHeartRateBeltManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFHeartRateBeltManager.m; sourceTree = "<group>"; };
 		29EC9FBC1897BCD300C9CF72 /* CWLSynthesizeSingleton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CWLSynthesizeSingleton.h; sourceTree = "<group>"; };
 		3B60C79415714FE794F4DB35 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		43595EB3B99E4F96A7F0F910 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
@@ -125,8 +125,8 @@
 			isa = PBXGroup;
 			children = (
 				29EC9FBC1897BCD300C9CF72 /* CWLSynthesizeSingleton.h */,
-				29EC9FB91897BC3500C9CF72 /* SFHeartRateBeltFinder.h */,
-				29EC9FBA1897BC3500C9CF72 /* SFHeartRateBeltFinder.m */,
+				29EC9FB91897BC3500C9CF72 /* SFHeartRateBeltManager.h */,
+				29EC9FBA1897BC3500C9CF72 /* SFHeartRateBeltManager.m */,
 				29EC9F901896BE1200C9CF72 /* SFAppDelegate.h */,
 				29EC9F911896BE1200C9CF72 /* SFAppDelegate.m */,
 				29EC9F931896BE1200C9CF72 /* Main_iPhone.storyboard */,
@@ -304,7 +304,7 @@
 			files = (
 				29EC9F8E1896BE1200C9CF72 /* main.m in Sources */,
 				29EC9F9B1896BE1200C9CF72 /* SFViewController.m in Sources */,
-				29EC9FBB1897BC3500C9CF72 /* SFHeartRateBeltFinder.m in Sources */,
+				29EC9FBB1897BC3500C9CF72 /* SFHeartRateBeltManager.m in Sources */,
 				29EC9F921896BE1200C9CF72 /* SFAppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

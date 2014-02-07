@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Thomas Billicsich. All rights reserved.
 //
 
-#import "SFHeartRateBeltFinder.h"
+#import "SFHeartRateBeltManager.h"
 
 #define CBUUIDMake(string) [CBUUID UUIDWithString:string]
 
@@ -28,7 +28,7 @@ static NSString* kBleCharHeartRateMeasurement = @"2A37";
 
 
 
-@interface SFHeartRateBeltFinder ()
+@interface SFHeartRateBeltManager ()
 @property (nonatomic) SFBluetoothSmartDevice* heartRateBelt;
 @property (nonatomic) NSTimeInterval timeout;
 @property (nonatomic) NSTimer* findTimer;
@@ -38,10 +38,10 @@ static NSString* kBleCharHeartRateMeasurement = @"2A37";
 @end
 
 
-@implementation SFHeartRateBeltFinder
+@implementation SFHeartRateBeltManager
 
 
-CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHeartRateBeltManager);
+CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedHeartRateBeltManager);
 
 
 - (id)init

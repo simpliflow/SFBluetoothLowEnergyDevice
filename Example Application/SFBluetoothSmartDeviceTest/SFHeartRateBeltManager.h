@@ -27,9 +27,9 @@ typedef NS_ENUM(NSInteger, SFHRError) {
 
 
 
-@interface SFHeartRateBeltFinder : NSObject <SFBluetoothSmartDeviceDelegate, CBCentralManagerDelegate>
+@interface SFHeartRateBeltManager : NSObject <SFBluetoothSmartDeviceDelegate, CBCentralManagerDelegate>
 
-CWL_DECLARE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHeartRateBeltManager)
+CWL_DECLARE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedHeartRateBeltManager)
 
 @property (nonatomic, assign) id<SFHeartRateBeltManagerDelegate> delegate;
 
@@ -71,18 +71,18 @@ CWL_DECLARE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltFinder, sharedHeart
 @protocol SFHeartRateBeltManagerDelegate
 /// One of two possible responses to connectoToHeartRateBelt. Sent when connect
 /// has been successful and HR-updates are expected to follow.
-- (void)manager:(SFHeartRateBeltFinder*)manager connectedToHeartRateBelt:(NSUUID*)beltIdentifier name:(NSString*)name;
+- (void)manager:(SFHeartRateBeltManager*)manager connectedToHeartRateBelt:(NSUUID*)beltIdentifier name:(NSString*)name;
 
 /// One of two possible responses to connectoToHeartRateBelt. Sent when connect to belt failed.
 /// Possible causes: belt already connected to other device, belt out of reach, no
 /// bluetooth, belt undistinguishable from close by belt
-- (void)manager:(SFHeartRateBeltFinder*)manager failedToConnectWithError:(NSError*)error;
+- (void)manager:(SFHeartRateBeltManager*)manager failedToConnectWithError:(NSError*)error;
 
 /// Necessary follow up to manager:connectedToHeartRateBelt:
-- (void)manager:(SFHeartRateBeltFinder*)manager disconnectedWithError:(NSError*)error;
+- (void)manager:(SFHeartRateBeltManager*)manager disconnectedWithError:(NSError*)error;
 
 /// Sent regularly (approx 1 to 2 Hz), after connect has been successful.
-- (void)manager:(SFHeartRateBeltFinder*)manager receivedHRUpdate:(NSNumber*)heartRate;
+- (void)manager:(SFHeartRateBeltManager*)manager receivedHRUpdate:(NSNumber*)heartRate;
 @optional
 - (void)bluetoothAvailableAgain;
 @end

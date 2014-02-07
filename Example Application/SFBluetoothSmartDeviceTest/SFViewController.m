@@ -7,7 +7,7 @@
 //
 
 #import "SFViewController.h"
-#import "SFHeartRateBeltFinder.h"
+#import "SFHeartRateBeltManager.h"
 
 
 @interface SFViewController ()
@@ -25,7 +25,7 @@
 {
   [super viewDidLoad];
   
-  SFHeartRateBeltFinder* hrManager = [SFHeartRateBeltFinder sharedHeartRateBeltManager];
+  SFHeartRateBeltManager* hrManager = [SFHeartRateBeltManager sharedHeartRateBeltManager];
   hrManager.delegate = self;
   [hrManager connectToHeartRateBelt:nil timeout:0];
   [hrManager addObserver:self forKeyPath:@"batteryPercentageOfConnectedBelt" options:0 context:nil];
@@ -36,7 +36,7 @@
 {
   if ([keyPath isEqualToString:@"batteryPercentageOfConnectedBelt"])
   {
-    UInt8 batteryLevel = [SFHeartRateBeltFinder sharedHeartRateBeltManager].batteryPercentageOfConnectedBelt;
+    UInt8 batteryLevel = [SFHeartRateBeltManager sharedHeartRateBeltManager].batteryPercentageOfConnectedBelt;
     
     if (batteryLevel >= 0)
       self.batteryLevel.text = @(batteryLevel).stringValue;
@@ -52,7 +52,7 @@
 #pragma mark SFHeartRateBeltManagerDelegate
 
 
-- (void)manager:(SFHeartRateBeltFinder*)manager connectedToHeartRateBelt:(NSUUID*)beltIdentifier name:(NSString*)name
+- (void)manager:(SFHeartRateBeltManager*)manager connectedToHeartRateBelt:(NSUUID*)beltIdentifier name:(NSString*)name
 {
   NSLog(@"ViewCtrl: Connected.");
   self.heartRateBeltState.numberOfLines = 2;
@@ -61,7 +61,7 @@
 }
 
 
-- (void)manager:(SFHeartRateBeltFinder*)manager failedToConnectWithError:(NSError*)error
+- (void)manager:(SFHeartRateBeltManager*)manager failedToConnectWithError:(NSError*)error
 {
   if (error.code == SFHRErrorNoBluetooth) {
     self.heartRateBeltState.numberOfLines = 1;
@@ -76,12 +76,12 @@
   self.heartRateBeltState.text = [NSString stringWithFormat:@"Failed\n%@", error.localizedDescription];
   [self.heartRateBeltState sizeToFit];
   
-  SFHeartRateBeltFinder* hrManager = [SFHeartRateBeltFinder sharedHeartRateBeltManager];
+  SFHeartRateBeltManager* hrManager = [SFHeartRateBeltManager sharedHeartRateBeltManager];
   [hrManager connectToHeartRateBelt:nil timeout:0];
 }
 
 
-- (void)manager:(SFHeartRateBeltFinder*)manager disconnectedWithError:(NSError*)error
+- (void)manager:(SFHeartRateBeltManager*)manager disconnectedWithError:(NSError*)error
 {
   if (error.code == SFHRErrorNoBluetooth) {
     self.heartRateBeltState.numberOfLines = 1;
@@ -102,12 +102,12 @@
   }
   [self.heartRateBeltState sizeToFit];
 
-  SFHeartRateBeltFinder* hrManager = [SFHeartRateBeltFinder sharedHeartRateBeltManager];
+  SFHeartRateBeltManager* hrManager = [SFHeartRateBeltManager sharedHeartRateBeltManager];
   [hrManager connectToHeartRateBelt:nil timeout:0];
 }
 
 
-- (void)manager:(SFHeartRateBeltFinder*)manager receivedHRUpdate:(NSNumber*)heartRate
+- (void)manager:(SFHeartRateBeltManager*)manager receivedHRUpdate:(NSNumber*)heartRate
 {
   NSLog(@"ViewCtrl: HR update: %@", heartRate);
   self.heartRateLabel.text = heartRate.stringValue;
@@ -121,7 +121,7 @@
   [self.heartRateBeltState sizeToFit];
   
   NSLog(@"ViewCtrl: Bluetooth available again");
-  SFHeartRateBeltFinder* hrManager = [SFHeartRateBeltFinder sharedHeartRateBeltManager];
+  SFHeartRateBeltManager* hrManager = [SFHeartRateBeltManager sharedHeartRateBeltManager];
   [hrManager connectToHeartRateBelt:nil timeout:0];
 }
 
