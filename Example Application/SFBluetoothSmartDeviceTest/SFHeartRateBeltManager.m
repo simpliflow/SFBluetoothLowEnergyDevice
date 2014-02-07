@@ -33,7 +33,6 @@ static NSString* kBleCharHeartRateMeasurement = @"2A37";
 @property (nonatomic) NSTimeInterval timeout;
 @property (nonatomic) NSTimer* findTimer;
 @property (nonatomic) BOOL hrBeltHasBeenConnected;
-@property (nonatomic) CBCentralManager* bluetoothStatusTracker;
 @property (nonatomic) BOOL bluetoothDidBecomeNotAvailable;
 @end
 
@@ -48,7 +47,6 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
 {
   if (self = [super init]) {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:@"UIApplicationWillTerminateNotification" object:nil];
-    _bluetoothStatusTracker = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
   }
   return self;
 }
@@ -248,28 +246,15 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
 // fore the own cbcentralmanager)
 - (void)fixedNoBluetooth
 {
-  NSLog(@"HR-Mgr: Bluetooth available again. This should not be called!!");
+  NSLog(@"HR-Mgr: Bluetooth available again.");
   [self.delegate bluetoothAvailableAgain];
 }
 
 
-
-
-#pragma mark -
-#pragma mark CBCentralManagerDelegate
-
-
-- (void)centralManagerDidUpdateState:(CBCentralManager*)central
-{
-  if (central.state == CBCentralManagerStatePoweredOn && self.bluetoothDidBecomeNotAvailable) {
-    self.bluetoothDidBecomeNotAvailable = NO;
-    [self.delegate bluetoothAvailableAgain];
-  }
-}
-
-
-
 @end
+
+
+
 
 #undef DISPATCH_ON_MAIN_QUEUE
 #undef CBUUIDMake
