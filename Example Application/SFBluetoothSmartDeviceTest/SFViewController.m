@@ -27,7 +27,8 @@
   
   SFHeartRateBeltManager* hrManager = [SFHeartRateBeltManager sharedHeartRateBeltManager];
   hrManager.delegate = self;
-  [hrManager connectToHeartRateBelt:nil timeout:0];
+  NSUUID* beltIdentifier = [[NSUUID alloc] initWithUUIDString:nil];
+  [hrManager connectToHeartRateBelt:beltIdentifier timeout:10];
   [hrManager addObserver:self forKeyPath:@"batteryPercentageOfConnectedBelt" options:0 context:nil];
 }
 
@@ -70,14 +71,18 @@
     return;
   }
   
-  NSLog(@"ViewCtrl: Failed to connect. Error: %@", error.localizedDescription);
-  
   self.heartRateBeltState.numberOfLines = 2;
   self.heartRateBeltState.text = [NSString stringWithFormat:@"Failed\n%@", error.localizedDescription];
   [self.heartRateBeltState sizeToFit];
   
   SFHeartRateBeltManager* hrManager = [SFHeartRateBeltManager sharedHeartRateBeltManager];
-  [hrManager connectToHeartRateBelt:nil timeout:0];
+  if (error.code == SFHRErrorNoDeviceFound) {
+    NSLog(@"ViewCtrl: No device found. Retrying.");
+    [hrManager connectToHeartRateBelt:nil timeout:10];
+  }
+  else {
+    NSLog(@"ViewCtrl: Failed to connect. Error (%@): %@", error.domain, error.localizedDescription);
+  }
 }
 
 
@@ -103,7 +108,7 @@
   [self.heartRateBeltState sizeToFit];
 
   SFHeartRateBeltManager* hrManager = [SFHeartRateBeltManager sharedHeartRateBeltManager];
-  [hrManager connectToHeartRateBelt:nil timeout:0];
+  [hrManager connectToHeartRateBelt:nil timeout:10];
 }
 
 
@@ -122,7 +127,7 @@
   
   NSLog(@"ViewCtrl: Bluetooth available again");
   SFHeartRateBeltManager* hrManager = [SFHeartRateBeltManager sharedHeartRateBeltManager];
-  [hrManager connectToHeartRateBelt:nil timeout:0];
+  [hrManager connectToHeartRateBelt:nil timeout:10];
 }
 
 
