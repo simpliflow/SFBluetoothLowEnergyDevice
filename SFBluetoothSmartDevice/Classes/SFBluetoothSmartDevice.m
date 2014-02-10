@@ -25,6 +25,7 @@ statement; \
 #import "SpacemanBlocks.h"
 
 #import "ARAnalytics.h"
+#import "Log4Cocoa.h"
 
 
 static NSString* kSFBluetoothSmartServiceBatteryUUID = @"180F";
@@ -77,6 +78,8 @@ static dispatch_queue_t __bleManagerQueue;
   static dispatch_once_t once;
   dispatch_once(&once, ^{
     [ARAnalytics setupGoogleAnalyticsWithID:@"UA-45282609-2"];
+    [[L4Logger rootLogger] setLevel:[L4Level info]];
+    [[L4Logger rootLogger] addAppender: [[L4ConsoleAppender alloc] initTarget:YES withLayout: [L4Layout simpleLayout]]];
   });
 }
 
@@ -139,7 +142,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)linkWithIdentifier:(NSUUID*)identifier
 {
-  NSLog(@"BLE-Device: linking");
+  log4Debug(@"BLE-Device: linking");
   self.identifier = identifier;
   DISPATCH_ON_BLE_QUEUE(self.shouldLink = YES; [self executeConnectDuties]);
 }
@@ -154,11 +157,11 @@ static dispatch_queue_t __bleManagerQueue;
 - (void)unlink
 {
   if (!self.shouldLink) {
-    NSLog(@"BLE-Device: double unlinking");
+    log4Warn(@"BLE-Device: linking");
     return;
   }
   
-  NSLog(@"BLE-Device: unlinking");
+  log4Info(@"BLE-Device: unlinking");
   self.shouldLink = NO;
   DISPATCH_ON_BLE_QUEUE([self executeDisconnectDuties]);
 }
@@ -169,7 +172,7 @@ static dispatch_queue_t __bleManagerQueue;
 }
 - (void)executeDisconnectDuties
 {
-  NSLog(@"BLE-Device: cancelling connection");
+  log4Debug(@"BLE-Device: cancelling connection");
   [self.BLEManager cancelConnection];
   
   self.linked = NO;
@@ -219,7 +222,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)managerFailedToConnectToSuitablePeripheral:(CBPeripheral*)peripheral error:(NSError*)error
 {
-  NSLog(@"BLE-Device: central failed to connect");
+  log4Info(@"BLE-Device: central failed to connect (%@: %@)", error.domain, error.localizedDescription);
   self.linked = NO;
   
   if (error.code == SFBluetoothSmartErrorUnableToDistinguishClosestDevice) {
@@ -272,7 +275,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)discoveryTimedOut
 {
-  NSLog(@"BLE-Device: Discovery timed out");
+  log4Debug(@"BLE-Device: Discovery timed out");
   [self invalidateDiscoveryTimer];
   [self executeDisconnectDuties];
 }
@@ -281,8 +284,7 @@ static dispatch_queue_t __bleManagerQueue;
 - (void)peripheralDidDiscoverCharacteristicsForService:(CBService*)service error:(NSError*)error
 {
   if (error) {
-    NSLog(@"Error in characteristic disovery: %@ %@", [error localizedDescription], error);
-    // TODO: Abort
+    log4Info(@"BLE-Device: Error in characteristic disovery: %@ %@", [error localizedDescription], error);
     return;
   }
   
@@ -304,7 +306,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)completedDiscovery
 {
-  NSLog(@"BLE-Device: connect and discovery complete");
+  log4Info(@"BLE-Device: link up and running");
   [self invalidateDiscoveryTimer];
   self.linked = YES;
 }
@@ -312,7 +314,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)managerDisconnectedFromPeripheral:(CBPeripheral*)peripheral error:(NSError *)error
 {
-  NSLog(@"BLE-Device: central disconnected from peripheral");
+  log4Debug(@"BLE-Device: central disconnected from peripheral");
   self.linked = NO;
   [self invalidateDiscoveryTimer];
   
@@ -423,7 +425,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)dealloc
 {
-  NSLog(@"BLE-Device: deallocating");
+  log4Debug(@"BLE-Device: deallocating");
   if (self.linked)
     [self unlink];
 }
@@ -434,7 +436,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)bluetoothNotAvailable
 {
-  NSLog(@"BLE-Device: Bluetooth not available. Cancelling link.");
+  log4Debug(@"BLE-Device: Bluetooth not available. Cancelling link.");
   [self unlink];
   
   if ([self.delegate respondsToSelector:@selector(noBluetooth)])
@@ -444,7 +446,7 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)bluetoothAvailableAgain
 {
-  NSLog(@"BLE-Device: Bluetooth no longer not available.");
+  log4Debug(@"BLE-Device: Bluetooth no longer not available.");
   
   if ([self.delegate respondsToSelector:@selector(fixedNoBluetooth)])
     DISPATCH_ON_MAIN_QUEUE([self.delegate fixedNoBluetooth]);
@@ -495,7 +497,7 @@ static dispatch_queue_t __bleManagerQueue;
     return;
   
   if (error) {
-    NSLog(@"error: %@ %@", [error localizedDescription], error);
+    log4Warn(@"error: %@ %@", [error localizedDescription], error);
     return;
   }
   
