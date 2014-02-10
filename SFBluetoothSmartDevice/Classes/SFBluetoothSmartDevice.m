@@ -52,6 +52,13 @@ static NSString* kSFBluetoothSmartCharacteristicBatteryLevelUUID = @"2A19";
 
 @property (nonatomic) NSTimer* batteryTimer;
 
+// This variable is set by the "outside" on the main thread
+// it is the indication for the ble-queue to know if it should
+// scan. Having this variable may lead to problems if it is YES
+// and then set to NO and back to YES within a short time, as the
+// shutting down of a scanning or connect process may not yet have
+// finished.
+// Currently this is mitigated by using unlinkWithBlock.
 @property (atomic) BOOL shouldLink;
 @end
 
@@ -147,7 +154,13 @@ static dispatch_queue_t __bleManagerQueue;
 - (void)unlink
 {
   NSLog(@"BLE-Device: unlinking");
-  DISPATCH_ON_BLE_QUEUE(self.shouldLink = NO; [self executeDisconnectDuties]);
+  self.shouldLink = NO;
+  DISPATCH_ON_BLE_QUEUE([self executeDisconnectDuties]);
+}
+- (void)unlinkWithBlock:(void (^) ())block
+{
+  [self unlink];
+  dispatch_async(self.bleManagerQueue, block);
 }
 - (void)executeDisconnectDuties
 {
@@ -219,6 +232,7 @@ static dispatch_queue_t __bleManagerQueue;
   self.peripheral.delegate = self;
   [self startToDiscover];
 }
+
 
 
 

@@ -32,6 +32,14 @@
 /// it is named "link")
 - (void)linkWithIdentifier:(NSUUID*)identifier;
 - (void)unlink;
+/// This is a hacky fix to the problem that the cancelling of the scan takes some time to reach
+/// the ble-queue.
+// Inside note: Within this time it could happen that "linkWithIdentifier:" has already been called
+// again while a scan is still running or a connection is still up (from the link before). So the
+// ble-device or the manager may think that the state should be kept unchanged.
+// at this time the best idea for a fix is to use a queue for link and unlink commands, and have
+// them be acknowledged, before executing the next.
+- (void)unlinkWithBlock:(void (^) ())block;
 
 
 @property (nonatomic, readonly) NSString* name;
