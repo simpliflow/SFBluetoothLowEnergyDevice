@@ -214,42 +214,35 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
 
 - (void)BTSmartDeviceEncounteredError:(NSError*)error
 {
-  NSLog(@"HR-Mgr: bt-device reported error (%@ %d: %@)", error.domain, error.code, error.localizedDescription);
+  NSLog(@"HR-Mgr: bt-device reported error, aborting (%@ %d: %@)", error.domain, error.code, error.localizedDescription);
   NSError* hrError = nil;
-  BOOL abortFind = YES;
   switch (error.code) {
     case SFBluetoothSmartErrorUnableToDistinguishClosestDevice:
       hrError = [self error:SFHRErrorUnableToDistinguishSingleDevice];
       break;
     case SFBluetoothSmartErrorProblemsInConnectionProcess:
       hrError = [self error:SFHRErrorUnknown];
-      abortFind = NO;
       break;
     case SFBluetoothSmartErrorProblemsInDiscoveryProcess:
       hrError = [self error:SFHRErrorUnknown];
-      abortFind = NO;
       break;
     case SFBluetoothSmartErrorConnectionClosedByDevice:
       hrError = [self error:SFHRErrorUnknown];
       break;
     case SFBluetoothSmartErrorUnknown:
       hrError = [self error:SFHRErrorUnknown];
-      abortFind = NO;
       break;
   }
   
-  if (abortFind) {
-    NSLog(@"HR-Mgr: aborting find process");
-    [self invalidateFindTimer];
-    
-    [self.heartRateBelt unlink];
-    if (self.hrBeltHasBeenConnected) {
-      [self.delegate manager:self disconnectedWithError:hrError];
-      self.hrBeltHasBeenConnected = NO;
-    }
-    else {
-      [self.delegate manager:self failedToConnectWithError:hrError];
-    }
+  [self invalidateFindTimer];
+  
+  [self.heartRateBelt unlink];
+  if (self.hrBeltHasBeenConnected) {
+    [self.delegate manager:self disconnectedWithError:hrError];
+    self.hrBeltHasBeenConnected = NO;
+  }
+  else {
+    [self.delegate manager:self failedToConnectWithError:hrError];
   }
 }
 
