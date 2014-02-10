@@ -153,6 +153,11 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)unlink
 {
+  if (!self.shouldLink) {
+    NSLog(@"BLE-Device: double unlinking");
+    return;
+  }
+  
   NSLog(@"BLE-Device: unlinking");
   self.shouldLink = NO;
   DISPATCH_ON_BLE_QUEUE([self executeDisconnectDuties]);
@@ -429,17 +434,18 @@ static dispatch_queue_t __bleManagerQueue;
 
 - (void)bluetoothNotAvailable
 {
-  NSLog(@"BLE-Device: Bluetooth not available");
+  NSLog(@"BLE-Device: Bluetooth not available. Cancelling link.");
+  [self unlink];
+  
   if ([self.delegate respondsToSelector:@selector(noBluetooth)])
     DISPATCH_ON_MAIN_QUEUE([self.delegate noBluetooth]);
-  
-  [self executeDisconnectDuties];
 }
 
 
 - (void)bluetoothAvailableAgain
 {
   NSLog(@"BLE-Device: Bluetooth no longer not available.");
+  
   if ([self.delegate respondsToSelector:@selector(fixedNoBluetooth)])
     DISPATCH_ON_MAIN_QUEUE([self.delegate fixedNoBluetooth]);
 }
