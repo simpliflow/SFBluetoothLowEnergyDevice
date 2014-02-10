@@ -67,15 +67,19 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
 - (void)connectToHeartRateBelt:(NSUUID*)beltIdentifier timeout:(NSTimeInterval)timeout;
 {
   NSLog(@"HR-Mgr: starting find. Identifier: %@. Timeout: %0.2f", beltIdentifier, timeout);
-  if (self.heartRateBelt) {
-    [self.heartRateBelt linkWithIdentifier:beltIdentifier];
-    return;
-  }
   
   if (timeout > 0.0)
     self.timeout = timeout;
   else
     self.timeout = 0.0;
+  
+  
+  if (self.heartRateBelt) {
+    [self.heartRateBelt linkWithIdentifier:beltIdentifier];
+    if (self.timeout)
+      self.findTimer = [NSTimer scheduledTimerWithTimeInterval:self.timeout target:self selector:@selector(findTimedOut:) userInfo:nil repeats:NO];
+    return;
+  }
   
   self.hrBeltHasBeenConnected = NO;
   
