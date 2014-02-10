@@ -78,14 +78,14 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
     self.timeout = 0.0;
   
   self.hrBeltHasBeenConnected = NO;
-
+  
   NSDictionary* heartBeltServicesAndCharacteristics = @{
                                                         CBUUIDMake(kBleServiceHeartRate) : @[CBUUIDMake(kBleCharHeartRateMeasurement)],
                                                         CBUUIDMake(kBleServiceBattery) : @[CBUUIDMake(kBleCharBatteryLevel)]
                                                         };
   NSArray* heartBeltAdvertisingServices = @[CBUUIDMake(kBleServiceHeartRate)];
   self.heartRateBelt = [SFBluetoothSmartDevice BTSmartDeviceWithServicesAndCharacteristics:heartBeltServicesAndCharacteristics
-                                                                       advertising:heartBeltAdvertisingServices];
+                                                                               advertising:heartBeltAdvertisingServices];
   [self.heartRateBelt linkWithIdentifier:beltIdentifier];
   if (self.timeout)
     self.findTimer = [NSTimer scheduledTimerWithTimeInterval:self.timeout target:self selector:@selector(findTimedOut:) userInfo:nil repeats:NO];
@@ -94,10 +94,10 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
 
 - (SInt8)batteryPercentageOfConnectedBelt
 {
-//  if (self.heartRateBelt.linked)
-//    return self.heartRateBelt.batteryLevel;
-//  else
-    return -1;
+  //  if (self.heartRateBelt.linked)
+  //    return self.heartRateBelt.batteryLevel;
+  //  else
+  return -1;
 }
 
 
