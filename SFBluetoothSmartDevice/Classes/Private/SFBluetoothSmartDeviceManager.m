@@ -87,10 +87,35 @@ static NSArray* __managerStateStrings;
 
 + (NSError*)error:(SFBluetoothSmartError)errorCode
 {
+  NSString* description = nil;
+  switch (errorCode) {
+    case 0:
+      description = @"Unable to distinguish closest device";
+      break;
+    case 1:
+      description = @"Problems in connection process";
+      break;
+    case 2:
+      description = @"Problems in discovery process";
+      break;
+    case 3:
+      description = @"Connection closed by device";
+      break;
+    case 4:
+      description = @"Other CoreBluetooth error";
+      break;
+    case 5:
+      description = @"Unknown error";
+      break;
+      
+    default:
+      break;
+  }
+  
   return [NSError errorWithDomain:@"SFBluetoothSmartError"
                              code:errorCode
                          userInfo:@{
-                                    NSLocalizedDescriptionKey: @"Error happened"
+                                    NSLocalizedDescriptionKey:description
                                     }];
 }
 
