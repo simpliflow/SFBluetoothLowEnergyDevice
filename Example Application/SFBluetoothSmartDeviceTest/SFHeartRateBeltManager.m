@@ -136,8 +136,11 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
   NSLog(@"HR-Mgr: search for belt timed out.");
   [self invalidateFindTimer];
   
-  [self.heartRateBelt unlink];
-  [self.delegate manager:self failedToConnectWithError:[self error:SFHRErrorNoDeviceFound]];
+  [self.heartRateBelt unlinkWithBlock:^{
+    dispatch_async(dispatch_get_main_queue(),^{
+      [self.delegate manager:self failedToConnectWithError:[self error:SFHRErrorNoDeviceFound]];
+    });
+  }];
 }
 
 
@@ -236,7 +239,6 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
   
   [self invalidateFindTimer];
   
-  [self.heartRateBelt unlink];
   if (self.hrBeltHasBeenConnected) {
     [self.delegate manager:self disconnectedWithError:hrError];
     self.hrBeltHasBeenConnected = NO;
@@ -254,7 +256,6 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
   self.findTimer = nil;
   self.bluetoothDidBecomeNotAvailable = YES;
   
-  [self.heartRateBelt unlink];
   if (self.hrBeltHasBeenConnected) {
     [self.delegate manager:self disconnectedWithError:[self error:SFHRErrorNoBluetooth]];
   }
