@@ -82,6 +82,7 @@
   }
   else {
     NSLog(@"ViewCtrl: Failed to connect. Error (%@): %@", error.domain, error.localizedDescription);
+    [hrManager connectToHeartRateBelt:nil timeout:10];
   }
 }
 
