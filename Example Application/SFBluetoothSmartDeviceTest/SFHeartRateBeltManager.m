@@ -159,6 +159,25 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
 
 - (NSError*)error:(SFHRError)errorCode
 {
+  NSString* description = nil;
+  switch (errorCode) {
+    case 0:
+      description = @"No Bluetooth";
+      break;
+    case 1:
+      description = @"No device found";
+      break;
+    case 2:
+      description = @"Unable to distinguish single device";
+      break;
+    case 3:
+      description = @"Unkown error";
+      break;
+      
+    default:
+      break;
+  }
+  
   return [NSError errorWithDomain:@"SFHRError"
                              code:errorCode
                          userInfo:@{
