@@ -184,7 +184,7 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(SFHeartRateBeltManager, sharedH
   return [NSError errorWithDomain:@"SFHRError"
                              code:errorCode
                          userInfo:@{
-                                    NSLocalizedDescriptionKey: @"Error happened"
+                                    NSLocalizedDescriptionKey: description
                                     }];
 }
 
