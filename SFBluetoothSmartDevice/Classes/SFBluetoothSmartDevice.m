@@ -330,7 +330,8 @@ static dispatch_queue_t __bleManagerQueue;
     //    }
   }
   
-  DISPATCH_ON_MAIN_QUEUE([self.delegate BTSmartDeviceEncounteredError:[SFBluetoothSmartDeviceManager error:SFBluetoothSmartErrorConnectionClosedByDevice]]);
+  if (self.shouldLink)
+    DISPATCH_ON_MAIN_QUEUE([self.delegate BTSmartDeviceEncounteredError:[SFBluetoothSmartDeviceManager error:SFBluetoothSmartErrorConnectionClosedByDevice]]);
 }
 
 
