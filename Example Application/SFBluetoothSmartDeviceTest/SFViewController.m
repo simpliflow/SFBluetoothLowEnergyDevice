@@ -7,7 +7,7 @@
 //
 
 #import "SFViewController.h"
-
+#import "Log4Cocoa.h"
 
 @interface SFViewController ()
 
@@ -18,6 +18,16 @@
 
 
 @implementation SFViewController
+
+
++ (void)initialize
+{
+  static dispatch_once_t once;
+  dispatch_once(&once, ^{
+    [[L4Logger rootLogger] setLevel:[L4Level info]];
+    [[L4Logger rootLogger] addAppender: [[L4ConsoleAppender alloc] initTarget:YES withLayout: [L4Layout simpleLayout]]];
+  });
+}
 
 
 - (void)viewDidLoad
@@ -70,7 +80,7 @@
 
 - (void)manager:(SFHeartRateBeltManager*)manager connectedToHeartRateBelt:(NSUUID*)beltIdentifier name:(NSString*)name
 {
-  NSLog(@"ViewCtrl: Connected.");
+  log4Info(@"ViewCtrl: Connected.");
   self.heartRateBeltState.numberOfLines = 2;
   self.heartRateBeltState.text = [NSString stringWithFormat:@"Connected to\n%@", name];
   [self.heartRateBeltState sizeToFit];
@@ -92,11 +102,11 @@
   
   SFHeartRateBeltManager* hrManager = [SFHeartRateBeltManager sharedHeartRateBeltManager];
   if (error.code == SFHRErrorNoDeviceFound) {
-    NSLog(@"ViewCtrl: No device found. Retrying.");
+    log4Info(@"ViewCtrl: No device found. Retrying.");
     [hrManager connectToHeartRateBelt:nil timeout:10];
   }
   else {
-    NSLog(@"ViewCtrl: Failed to connect. Error (%@): %@", error.domain, error.localizedDescription);
+    log4Info(@"ViewCtrl: Failed to connect. Error (%@): %@", error.domain, error.localizedDescription);
     [hrManager connectToHeartRateBelt:nil timeout:10];
   }
 }
@@ -112,12 +122,12 @@
   }
   
   if (!error) {
-    NSLog(@"ViewCtrl: Disconnected.");
+    log4Info(@"ViewCtrl: Disconnected.");
     self.heartRateBeltState.numberOfLines = 1;
     self.heartRateBeltState.text = @"Disconnected";
   }
   else {
-    NSLog(@"ViewCtrl: Disconnected. Error: %@", error.localizedDescription);
+    log4Info(@"ViewCtrl: Disconnected. Error: %@", error.localizedDescription);
     self.heartRateBeltState.numberOfLines = 1;
     self.heartRateBeltState.text = [NSString stringWithFormat:@"Disconnected\n%@", error.localizedDescription];
   }
@@ -130,7 +140,7 @@
 
 - (void)manager:(SFHeartRateBeltManager*)manager receivedHRUpdate:(NSNumber*)heartRate
 {
-  NSLog(@"ViewCtrl: HR update: %@", heartRate);
+  log4Info(@"ViewCtrl: HR update: %@", heartRate);
   self.heartRateLabel.text = heartRate.stringValue;
 }
 
@@ -141,7 +151,7 @@
   self.heartRateBeltState.text = @"Searching";
   [self.heartRateBeltState sizeToFit];
   
-  NSLog(@"ViewCtrl: Bluetooth available again");
+  log4Info(@"ViewCtrl: Bluetooth available again");
   SFHeartRateBeltManager* hrManager = [SFHeartRateBeltManager sharedHeartRateBeltManager];
   [hrManager connectToHeartRateBelt:nil timeout:10];
 }

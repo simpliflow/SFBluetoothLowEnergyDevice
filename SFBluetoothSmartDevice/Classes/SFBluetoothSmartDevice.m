@@ -79,7 +79,9 @@ static dispatch_queue_t __bleManagerQueue;
   dispatch_once(&once, ^{
     [ARAnalytics setupGoogleAnalyticsWithID:@"UA-45282609-2"];
     [[L4Logger rootLogger] setLevel:[L4Level info]];
-    [[L4Logger rootLogger] addAppender: [[L4ConsoleAppender alloc] initTarget:YES withLayout: [L4Layout simpleLayout]]];
+    if ([L4Logger rootLogger].allAppenders.count == 0) {
+      [[L4Logger rootLogger] addAppender: [[L4ConsoleAppender alloc] initTarget:YES withLayout: [L4Layout simpleLayout]]];
+    }
   });
 }
 
