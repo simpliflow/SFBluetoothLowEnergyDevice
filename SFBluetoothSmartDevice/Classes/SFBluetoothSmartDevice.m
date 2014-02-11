@@ -7,14 +7,14 @@
 //
 
 
-#define DISPATCH_ON_MAIN_QUEUE(statement) \
+#define DISPATCH_ON_MAIN_QUEUE(statement) do { \
 dispatch_async(dispatch_get_main_queue(), ^{ \
 statement; \
-})
-#define DISPATCH_ON_BLE_QUEUE(statement) \
+}); } while(0)
+#define DISPATCH_ON_BLE_QUEUE(statement) do { \
 dispatch_async(self.bleManagerQueue, ^{ \
 statement; \
-})
+}); } while(0)
 
 #define DISCOVERY_TIMEOUT 2.0
 #define BATTERY_CHECK_TIME_INTERVAL 300.0
@@ -97,7 +97,7 @@ static dispatch_queue_t __bleManagerQueue;
 - (id)initWithServicesAndCharacteristics:(NSDictionary*)servicesAndCharacteristics advertising:(NSArray*)services
 {
   if (self = [super init]) {
-
+    
     // Check
     //   * the keys of servicesAndCharacteristics
     //   * the elements within the arrays that are the values of servicesAndCharacteristics
@@ -107,7 +107,7 @@ static dispatch_queue_t __bleManagerQueue;
     for (NSArray* shouldBeUUIDs in @[servicesAndCharacteristics.allKeys, characteristics, services]) {
       for (id shouldBeUUID in servicesAndCharacteristics.allKeys) {
         if (![shouldBeUUID isKindOfClass:[CBUUID class]])
-        return nil;
+          return nil;
       }
     }
     // Check
@@ -122,7 +122,7 @@ static dispatch_queue_t __bleManagerQueue;
     
     self.advertisingServices = services;
     _servicesAndCharacteristics = servicesAndCharacteristics;
-
+    
     self.BLEManager = [SFBluetoothSmartDeviceManager deviceManager];
     self.BLEManager.delegate = self;
   }
@@ -192,7 +192,7 @@ static dispatch_queue_t __bleManagerQueue;
   else {
     self.identifier = self.peripheral.identifier;
     _linked = linked;
-
+    
     CBUUID* batteryServiceUUID = [CBUUID UUIDWithString:kSFBluetoothSmartServiceBatteryUUID];
     CBUUID* batteryLevelCharacteristicUUID = [CBUUID UUIDWithString:kSFBluetoothSmartCharacteristicBatteryLevelUUID];
     BOOL hasBatteryService = [self.servicesAndCharacteristics.allKeys containsObject:batteryServiceUUID];
@@ -252,7 +252,7 @@ static dispatch_queue_t __bleManagerQueue;
 {
   [self.peripheral discoverServices:[self.servicesAndCharacteristics allKeys]];
   [self startDiscoveryTimer];
-
+  
 }
 
 
@@ -289,7 +289,7 @@ static dispatch_queue_t __bleManagerQueue;
   }
   
   self.servicesByUUID[service.UUID] = service;
-
+  
   for (CBCharacteristic* characteristic in service.characteristics) {
     self.characteristicsByUUID[characteristic.UUID] = characteristic;
   }
@@ -321,13 +321,13 @@ static dispatch_queue_t __bleManagerQueue;
   // TODO: this is copied from the manager, has to be adapted for here
   if (error) {
     // in case of a timeout, try a second time before reporting a failed attempt
-//    if (error.code == 6 && !self.connectionAttemptHasTimedOutBefore) {
-//      [self invalidateConnectTimer];
-//      NSLog(@"BLE-Manager: Connection has timed out. Trying a second time");
-//      self.connectionAttemptHasTimedOutBefore = YES;
-//      [self connectToSuitablePeripheral];
-//      return;
-//    }
+    //    if (error.code == 6 && !self.connectionAttemptHasTimedOutBefore) {
+    //      [self invalidateConnectTimer];
+    //      NSLog(@"BLE-Manager: Connection has timed out. Trying a second time");
+    //      self.connectionAttemptHasTimedOutBefore = YES;
+    //      [self connectToSuitablePeripheral];
+    //      return;
+    //    }
   }
   
   DISPATCH_ON_MAIN_QUEUE([self.delegate BTSmartDeviceEncounteredError:[SFBluetoothSmartDeviceManager error:SFBluetoothSmartErrorConnectionClosedByDevice]]);
@@ -367,7 +367,7 @@ static dispatch_queue_t __bleManagerQueue;
 - (void)unsubscribeFromCharacteristic:(CBUUID*)characteristicUUID
 {
   if (!self.linked)
-  return;
+    return;
   
   CBCharacteristic* characteristic = self.characteristicsByUUID[characteristicUUID];
   [self.peripheral setNotifyValue:NO forCharacteristic:characteristic];
