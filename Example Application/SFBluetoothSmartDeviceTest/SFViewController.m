@@ -7,7 +7,6 @@
 //
 
 #import "SFViewController.h"
-#import "SFHeartRateBeltManager.h"
 
 
 @interface SFViewController ()
@@ -44,6 +43,22 @@
     else
       self.batteryLevel.text = @"-";
   }
+}
+
+
+- (IBAction)disconnectButtonPushed:(UIButton*)sender
+{
+  SFHeartRateBeltManager* hrManager = [SFHeartRateBeltManager sharedHeartRateBeltManager];
+  [hrManager disconnectFromHeartRateBelt];
+  
+  [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(connectToHRBelt) userInfo:nil repeats:NO];
+}
+
+
+- (void)connectToHRBelt
+{
+  SFHeartRateBeltManager* hrManager = [SFHeartRateBeltManager sharedHeartRateBeltManager];
+  [hrManager connectToHeartRateBelt:nil timeout:10];
 }
 
 

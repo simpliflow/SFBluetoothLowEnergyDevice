@@ -18,4 +18,5 @@
 
 @property (weak, nonatomic) IBOutlet UILabel* batteryLevel;
 
+- (IBAction)disconnectButtonPushed:(UIButton*)sender;
 @end
