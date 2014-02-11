@@ -218,6 +218,13 @@
 				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = SimpliFlow;
 				TargetAttributes = {
+					29EC9F7D1896BE1200C9CF72 = {
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
+					};
 					29EC9FA11896BE1200C9CF72 = {
 						TestTargetID = 29EC9F7D1896BE1200C9CF72;
 					};
