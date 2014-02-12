@@ -119,8 +119,6 @@ static NSArray* __managerStateStrings;
 }
 
 
-
-
 + (instancetype)deviceManager
 {
   return [[SFBluetoothSmartDeviceManager alloc] init];
@@ -166,7 +164,7 @@ static NSArray* __managerStateStrings;
 {
   log4Debug(@"BLE-Manager: cancelling connection");
   [self stopScan];
-  [self invalidateScanForAlternativesTimer];
+  [self invalidateScanForAlternatesTimer];
   [self invalidateConnectTimer];
 
   if (self.suitablePeripheral) {
@@ -250,7 +248,7 @@ static NSArray* __managerStateStrings;
 }
 
 
-- (void)invalidateScanForAlternativesTimer
+- (void)invalidateScanForAlternatesTimer
 {
   if (_scanForAlternatesTimeoutBlock) {
     cancel_delayed_block(_scanForAlternatesTimeoutBlock);
@@ -263,7 +261,7 @@ static NSArray* __managerStateStrings;
 {
   log4Debug(@"BLE-Manager: finished scanning for alternates, found %d peripherals.", self.discoveredPeripherals.count);
   [self stopScan];
-  [self invalidateScanForAlternativesTimer];
+  [self invalidateScanForAlternatesTimer];
   
   
   NSMutableDictionary* discoveredPerphs = self.discoveredPeripherals;
@@ -417,7 +415,7 @@ static NSArray* __managerStateStrings;
            central.state == CBCentralManagerStateUnsupported ||
            central.state == CBCentralManagerStateUnauthorized)
   {
-    [self invalidateScanForAlternativesTimer];
+    [self invalidateScanForAlternatesTimer];
     [self invalidateConnectTimer];
 
     if (self.suitablePeripheral) {
