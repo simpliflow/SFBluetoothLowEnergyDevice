@@ -227,7 +227,8 @@ static dispatch_queue_t __bleManagerQueue;
   log4Info(@"BLE-Device: central failed to connect (%@: %@)", error.domain, error.localizedDescription);
   self.linked = NO;
   
-  if (error.code == SFBluetoothSmartErrorUnableToDistinguishClosestDevice) {
+  if (error.code == SFBluetoothSmartErrorUnableToDistinguishClosestDevice
+      || error.code == SFBluetoothSmartErrorNoBluetooth) {
     DISPATCH_ON_MAIN_QUEUE([self.delegate BTSmartDeviceEncounteredError:error]);
   }
   else {

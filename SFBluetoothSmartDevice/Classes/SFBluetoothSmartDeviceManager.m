@@ -88,22 +88,25 @@ static NSArray* __managerStateStrings;
 {
   NSString* description = nil;
   switch (errorCode) {
-    case 0:
+      case SFBluetoothSmartErrorNoBluetooth:
+      description = @"Bluetooth not available";
+      break;
+      case SFBluetoothSmartErrorUnableToDistinguishClosestDevice:
       description = @"Unable to distinguish closest device";
       break;
-    case 1:
+      case SFBluetoothSmartErrorProblemsInConnectionProcess:
       description = @"Problems in connection process";
       break;
-    case 2:
+      case SFBluetoothSmartErrorProblemsInDiscoveryProcess:
       description = @"Problems in discovery process";
       break;
-    case 3:
+      case SFBluetoothSmartErrorConnectionClosedByDevice:
       description = @"Connection closed by device";
       break;
-    case 4:
+      case SFBluetoothSmartErrorOtherCBError:
       description = @"Other CoreBluetooth error";
       break;
-    case 5:
+      case SFBluetoothSmartErrorUnknown:
       description = @"Unknown error";
       break;
       
@@ -144,6 +147,13 @@ static NSArray* __managerStateStrings;
 
 - (void)search:(NSUUID*)identifier advertising:(NSArray*)services
 {
+  if (self.bleManager.state == CBCentralManagerStatePoweredOff ||
+  self.bleManager.state == CBCentralManagerStateUnsupported ||
+      self.bleManager.state == CBCentralManagerStateUnauthorized) {
+    [self.delegate managerFailedToConnectToSuitablePeripheral:nil error:[SFBluetoothSmartDeviceManager error:SFBluetoothSmartErrorNoBluetooth]];
+    return;
+  }
+  
   NSString* servicesString = [[services valueForKeyPath:@"@unionOfObjects.description"] componentsJoinedByString:@", "];
   if (identifier) {
     log4Debug(@"BLE-Manager: starts finding of peripheral (%@) advertising: %@", identifier, servicesString);
