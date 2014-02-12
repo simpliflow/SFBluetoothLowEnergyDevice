@@ -170,7 +170,11 @@ static dispatch_queue_t __bleManagerQueue;
 - (void)unlinkWithBlock:(void (^) ())block
 {
   [self unlink];
-  dispatch_async(self.bleManagerQueue, block);
+  // make sure that the block is run, after the ble queue has been run
+  // and the cancel has propagated to the manager
+  dispatch_async(self.bleManagerQueue, ^{
+                 dispatch_async(dispatch_get_main_queue(), block);
+  });
 }
 - (void)executeDisconnectDuties
 {
