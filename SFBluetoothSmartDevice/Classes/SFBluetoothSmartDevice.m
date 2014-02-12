@@ -159,7 +159,7 @@ static dispatch_queue_t __bleManagerQueue;
 - (void)unlink
 {
   if (!self.shouldLink) {
-    log4Warn(@"BLE-Device: linking");
+    log4Warn(@"BLE-Device: double unlinking");
     return;
   }
   
