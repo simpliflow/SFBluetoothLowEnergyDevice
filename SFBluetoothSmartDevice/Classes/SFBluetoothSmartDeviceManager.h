@@ -14,7 +14,7 @@
 
 // Error codes for NSErrors, domain is "SFBluetoothSmartDevice"
 typedef NS_ENUM(NSInteger, SFBluetoothSmartError) {
-  SFBluetoothSmartErrorNoBluetooth = 0,
+  SFBluetoothSmartErrorNoBluetooth = 1,
   SFBluetoothSmartErrorUnableToDistinguishClosestDevice,
   SFBluetoothSmartErrorProblemsInConnectionProcess,
   SFBluetoothSmartErrorProblemsInDiscoveryProcess,
