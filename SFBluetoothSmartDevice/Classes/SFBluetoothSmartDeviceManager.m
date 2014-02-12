@@ -79,7 +79,6 @@ static NSArray* __managerStateStrings;
                                 @"PoweredOff",
                                 @"PoweredOn"
                                 ];
-      
     }
   });
 }
