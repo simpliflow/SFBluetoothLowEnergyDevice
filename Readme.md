@@ -1,4 +1,5 @@
 # SFBluetoothSmartDevice, Alpha
+**Note: the information in this Readme is outdated as of Release 0.5.0**
 An opinionated wrapper for CoreBluetooth to ease the communication with simple Bluetooth smart (Bluetooth Low Energy, Bluetooth 4.0, BLE) devices.
 
 ## Purpose and Intention
