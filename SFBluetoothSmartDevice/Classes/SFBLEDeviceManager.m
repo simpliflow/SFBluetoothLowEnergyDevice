@@ -38,6 +38,8 @@ statement; \
 @property (readwrite) NSDictionary* servicesAndCharacteristics;
 @property (nonatomic, copy) NSArray* advertisedServices;
 @property (nonatomic) SFBLECentralManagerDelegate* centralDelegate;
+
+@property (atomic) BOOL bluetoothIsNotAvailable;
 @end
 
 
@@ -156,6 +158,11 @@ static dispatch_queue_t __bleQueue;
   if (self.shouldScan)
     return;
   
+  if (self.bluetoothIsNotAvailable) {
+    DISPATCH_ON_MAIN_QUEUE([self.delegate managerStoppedScanWithError:[SFBLEDeviceManager error:SFBluetoothSmartErrorNoBluetooth]]);
+    return;
+  }
+  
   self.shouldScan = YES;
   DISPATCH_ON_BLE_QUEUE(
                         if (timeout > 0) {
@@ -264,6 +271,15 @@ static dispatch_queue_t __bleQueue;
 
 - (void)bluetoothNotAvailable
 {
+  self.bluetoothIsNotAvailable = YES;
+  if (self.shouldScan) {
+    [self executeStoppingScanDuties];
+    DISPATCH_ON_MAIN_QUEUE(
+                           self.shouldScan = NO;
+                           [self.delegate managerStoppedScanWithError:[SFBLEDeviceManager error:SFBluetoothSmartErrorNoBluetooth]];
+    );
+  }
+  
   if ([self.delegate respondsToSelector:@selector(bluetoothNotAvailable)]) {
     [self.delegate bluetoothNotAvailable];
   }
@@ -272,6 +288,7 @@ static dispatch_queue_t __bleQueue;
 
 - (void)bluetoothAvailableAgain
 {
+  self.bluetoothIsNotAvailable = NO;
   if ([self.delegate respondsToSelector:@selector(bluetoothAvailableAgain)]) {
     [self.delegate bluetoothAvailableAgain];
   }
