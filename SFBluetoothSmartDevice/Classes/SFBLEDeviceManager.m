@@ -9,7 +9,8 @@
 #import "SFBLEDeviceManager.h"
 #import "SpacemanBlocks.h"
 #import "DDLog.h"
-#import "DDASLLogger.h"
+#import "DDTTYLogger.h"
+#import "SFConsoleLogFormat.h"
 
 #import "SFBLEDevice.h"
 #import "SFBLECentralManagerDelegate.h"
@@ -53,7 +54,8 @@ static dispatch_queue_t __bleQueue;
   static dispatch_once_t once;
   dispatch_once(&once, ^{
     __bleQueue = dispatch_queue_create("com.simpliflow_ble.queue", DISPATCH_QUEUE_SERIAL);
-    [DDLog addLogger:[DDASLLogger sharedInstance]];
+    [[DDTTYLogger sharedInstance] setLogFormatter:[[SFConsoleLogFormat alloc] init]];
+    [DDLog addLogger:[DDTTYLogger sharedInstance]];
   });
 }
 
