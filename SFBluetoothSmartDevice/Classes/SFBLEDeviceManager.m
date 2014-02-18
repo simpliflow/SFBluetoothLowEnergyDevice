@@ -8,7 +8,8 @@
 
 #import "SFBLEDeviceManager.h"
 #import "SpacemanBlocks.h"
-#import "Log4Cocoa.h"
+#import "DDLog.h"
+#import "DDASLLogger.h"
 
 #import "SFBLEDevice.h"
 #import "SFBLECentralManagerDelegate.h"
@@ -22,8 +23,6 @@ statement; \
 dispatch_async(SFBLEDeviceManager.bleQueue, ^{ \
 statement; \
 }); } while(0)
-
-
 
 
 @interface SFBLEDeviceManager () {
@@ -41,6 +40,9 @@ statement; \
 @end
 
 
+static const int ddLogLevel = LOG_LEVEL_INFO;
+
+
 
 
 @implementation SFBLEDeviceManager
@@ -51,10 +53,7 @@ static dispatch_queue_t __bleQueue;
   static dispatch_once_t once;
   dispatch_once(&once, ^{
     __bleQueue = dispatch_queue_create("com.simpliflow_ble.queue", DISPATCH_QUEUE_SERIAL);
-    [[L4Logger rootLogger] setLevel:[L4Level info]];
-    if ([L4Logger rootLogger].allAppenders.count == 0) {
-      [[L4Logger rootLogger] addAppender: [[L4ConsoleAppender alloc] initTarget:YES withLayout: [L4Layout simpleLayout]]];
-    }
+    [DDLog addLogger:[DDASLLogger sharedInstance]];
   });
 }
 
@@ -194,18 +193,18 @@ static dispatch_queue_t __bleQueue;
   if (self.discoveredDevices.count == 0) {
     NSError* bleError = nil;
     if (self.identifierToScanFor) {
-      log4Info(@"BLE-Manager: scan timed out. Specific device not found");
+      DDLogInfo(@"BLE-Manager: scan timed out. Specific device not found");
       bleError = [SFBLEDeviceManager error:SFBluetoothSmartErrorSpecificDeviceNotFound];
     }
     else {
-      log4Info(@"BLE-Manager: scan timed out. No device found");
+      DDLogInfo(@"BLE-Manager: scan timed out. No device found");
       bleError = [SFBLEDeviceManager error:SFBluetoothSmartErrorNoDeviceFound];
     }
     
     DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate managerStoppedScanWithError:bleError]);
   }
   else {
-    log4Info(@"BLE-Manager: scan timed out. Found %d device(s).", self.discoveredDevices.count);
+    DDLogInfo(@"BLE-Manager: scan timed out. Found %d device(s).", self.discoveredDevices.count);
     DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate managerFoundDevices:self.discoveredDevices.allValues]);
   }
 }
@@ -222,7 +221,7 @@ static dispatch_queue_t __bleQueue;
     return;
   
   if ([self.identifierToScanFor isEqual:peripheral.identifier]) {
-    log4Debug(@"BLE-Manager: did discover suitable peripheral: %@", peripheral);
+    DDLogDebug(@"BLE-Manager: did discover suitable peripheral: %@", peripheral);
     [self executeStoppingScanDuties];
     
     SFBLEDevice* suitableDevice = [SFBLEDevice deviceWithPeripheral:peripheral centralDelegate:self.centralDelegate servicesAndCharacteristics:self.servicesAndCharacteristics];
@@ -230,15 +229,15 @@ static dispatch_queue_t __bleQueue;
   }
   else if (!self.identifierToScanFor) {
     if (![self.discoveredDevices.allKeys containsObject:peripheral.identifier]) {
-      log4Info(@"BLE-Manager: new suitable peripheral %p (%@, %@). RSSI: %@", peripheral, peripheral.identifier, peripheral.name, RSSI);
+      DDLogInfo(@"BLE-Manager: new suitable peripheral %p (%@, %@). RSSI: %@", peripheral, peripheral.identifier, peripheral.name, RSSI);
       self.discoveredDevices[peripheral.identifier] = [SFBLEDevice deviceWithPeripheral:peripheral centralDelegate:self.centralDelegate servicesAndCharacteristics:self.servicesAndCharacteristics];
     }
     else {
-//      log4Debug(@"BLE-Manager: rediscovered suitable peripheral %p. RSSI: %@", peripheral, RSSI);
+//      DDLogDebug(@"BLE-Manager: rediscovered suitable peripheral %p. RSSI: %@", peripheral, RSSI);
     }
   }
   else {
-    log4Debug(@"BLE-Manager: did discover unsuitable peripheral: %@", peripheral);
+    DDLogDebug(@"BLE-Manager: did discover unsuitable peripheral: %@", peripheral);
   }
 }
 

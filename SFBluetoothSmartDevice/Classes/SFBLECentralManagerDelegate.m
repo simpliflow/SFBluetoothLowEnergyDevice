@@ -7,7 +7,7 @@
 
 
 #import "SFBLECentralManagerDelegate.h"
-#import "Log4Cocoa.h"
+#import "DDLog.h"
 
 #import "SFBLEDeviceManager.h"
 #import "SFBLEDevice.h"
@@ -35,8 +35,11 @@
 // State of Bluetooth
 @property (nonatomic) BOOL bluetoothWasUnavailable;
 
-
 @end
+
+
+static const int ddLogLevel = LOG_LEVEL_INFO;
+
 
 
 
@@ -91,7 +94,7 @@ static NSArray* __managerStateStrings;
   NSAssert(self.bleCentral.state != CBCentralManagerStateUnauthorized, @"Call should not come through in this state");
 
   NSString* servicesString = [[advertisedServices valueForKeyPath:@"@unionOfObjects.description"] componentsJoinedByString:@", "];
-  log4Debug(@"BLE-CentralDelegate: will start scanning for devs advertising: %@", servicesString);
+  DDLogDebug(@"BLE-CentralDelegate: will start scanning for devs advertising: %@", servicesString);
 
   self.servicesToScanFor = advertisedServices;
 
@@ -103,7 +106,7 @@ static NSArray* __managerStateStrings;
 - (void)startScan
 {
   if (self.shouldScan && self.bleCentral.state == CBCentralManagerStatePoweredOn) {
-    log4Debug(@"BLE-CentralDelegate: starting scan");
+    DDLogDebug(@"BLE-CentralDelegate: starting scan");
     [self.bleCentral scanForPeripheralsWithServices:self.servicesToScanFor options:@{CBCentralManagerScanOptionAllowDuplicatesKey : @YES}];
   }
 }
@@ -152,7 +155,7 @@ static NSArray* __managerStateStrings;
 
 - (void)centralManagerDidUpdateState:(CBCentralManager*)central
 {
-  log4Debug(@"BLE-CentralDelegate: central updated state to %@", __managerStateStrings[central.state]);
+  DDLogDebug(@"BLE-CentralDelegate: central updated state to %@", __managerStateStrings[central.state]);
   
   if (central.state == CBCentralManagerStatePoweredOn)
   {
@@ -198,7 +201,7 @@ static NSArray* __managerStateStrings;
 
 - (void)centralManager:(CBCentralManager*)central didConnectPeripheral:(CBPeripheral*)peripheral
 {
-  log4Debug(@"BLE-CentralDelegate: connected peripheral %@", peripheral.name);
+  DDLogDebug(@"BLE-CentralDelegate: connected peripheral %@", peripheral.name);
   SFBLEDevice* device = self.devicesByPeripheral[peripheral];
   NSAssert(device, @"No device found although there should be one");
   [device didConnectPeripheral:peripheral];
@@ -207,7 +210,7 @@ static NSArray* __managerStateStrings;
 
 - (void)centralManager:(CBCentralManager*)central didFailToConnectPeripheral:(CBPeripheral*)peripheral error:(NSError*)error
 {
-  log4Debug(@"BLE-CentralDelegate: failed to connect peripheral %@", peripheral.name);
+  DDLogDebug(@"BLE-CentralDelegate: failed to connect peripheral %@", peripheral.name);
   SFBLEDevice* device = self.devicesByPeripheral[peripheral];
   // Note: In case of Bluetooth going to off every peripheral is sent a cancel call. If the
   //    central answers this with a disconnect call it is to be expected that the device

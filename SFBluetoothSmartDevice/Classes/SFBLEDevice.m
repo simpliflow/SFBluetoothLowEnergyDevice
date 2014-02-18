@@ -8,7 +8,7 @@
 
 #import "SFBLEDevice.h"
 #import "SpacemanBlocks.h"
-#import "Log4Cocoa.h"
+#import "DDLog.h"
 
 #import "SFBLEDeviceManager.h"
 #import "SFBLECentralManagerDelegate.h"
@@ -57,6 +57,9 @@ statement; \
 @property (readwrite) NSNumber* batteryLevel;
 
 @end
+
+
+static const int ddLogLevel = LOG_LEVEL_INFO;
 
 
 
@@ -117,7 +120,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 
 - (void)link
 {
-  log4Debug(@"BLE-Device: starting link");
+  DDLogDebug(@"BLE-Device: starting link");
 
   if (self.shouldLink)
     return;
@@ -139,7 +142,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 
 - (void)unlink
 {
-  log4Debug(@"BLE-Device: starting unlink");
+  DDLogDebug(@"BLE-Device: starting unlink");
   
   if (!self.shouldLink)
     return;
@@ -187,7 +190,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 
 - (void)linkingFailed:(NSError*)SFError
 {
-  log4Debug(@"BLE-Device: linking failed");
+  DDLogDebug(@"BLE-Device: linking failed");
 
   NSAssert(!(self.linking && self.linked), @"This should not happen.");
   if (SFError)
@@ -207,7 +210,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 
 - (void)disconnected:(NSError*)SFError
 {
-  log4Debug(@"BLE-Device: disconnected");
+  DDLogDebug(@"BLE-Device: disconnected");
 
   NSAssert(!(self.linking && self.linked), @"This should not happen.");
   if (SFError)
@@ -244,7 +247,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 
 - (void)connect
 {
-  log4Debug(@"BLE-Device: starting connect to suitable peripheral: %@", self.peripheral);
+  DDLogDebug(@"BLE-Device: starting connect to suitable peripheral: %@", self.peripheral);
   
   [self startConnectTimer];
   [self.centralDelegate connectToDevice:self];
@@ -270,7 +273,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 
 - (void)connectTimedOut
 {
-  log4Info(@"BLE-Device: connect timed out. Reporting error.");
+  DDLogInfo(@"BLE-Device: connect timed out. Reporting error.");
   [self invalidateConnectTimer];
   // the connection does not time out automatically, we have to do this explicitly
   [self.centralDelegate cancelConnectionToDevice:self];
@@ -284,7 +287,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
   NSAssert(peripheral == self.peripheral, @"Wrong peripheral");
   NSAssert(error, @"No error provided");
   
-  log4Info(@"BLE-Device: failed to connect to %@", self.peripheral.name);
+  DDLogInfo(@"BLE-Device: failed to connect to %@", self.peripheral.name);
   [self invalidateConnectTimer];
   
   NSError* sfError = nil;
@@ -303,7 +306,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 {
   NSAssert(peripheral == self.peripheral, @"Wrong peripheral");
   
-  log4Debug(@"BLE-Device: connected to %@", self.peripheral.name);
+  DDLogDebug(@"BLE-Device: connected to %@", self.peripheral.name);
   [self invalidateConnectTimer];
   
   self.peripheralDelegate = [SFBLEPeripheralDelegate peripheralDelegateWithServicesAndCharacteristics:self.servicesAndCharacteristics forDevice:self];
@@ -320,14 +323,14 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 
 - (void)completedDiscovery
 {
-  log4Info(@"BLE-Device: link up and running");
+  DDLogInfo(@"BLE-Device: link up and running");
   [self linkingComplete];
 }
 
 
 - (void)discoveryTimedOut
 {
-  log4Info(@"BLE-Device: discovery timed out. Reporting error.");
+  DDLogInfo(@"BLE-Device: discovery timed out. Reporting error.");
   // the connection does not time out automatically, we have to do this explicitly
   [self.centralDelegate cancelConnectionToDevice:self];
   
@@ -346,7 +349,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
   // TODO: filter out apple errors (it should be safe to let SFBLEErrors through)
   NSError* sfError = nil;
   if (error) {
-    log4Info(@"BLE-Device: disconnected from %@ with error (%@ %d: %@).", self.peripheral.name, error.domain, error.code, error.localizedDescription);
+    DDLogInfo(@"BLE-Device: disconnected from %@ with error (%@ %d: %@).", self.peripheral.name, error.domain, error.code, error.localizedDescription);
     
     if (error.code == CBErrorPeripheralDisconnected) {
       sfError = [SFBLEDeviceManager error:SFBluetoothSmartErrorConnectionClosedByDevice];
@@ -358,7 +361,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
     }
   }
   else {
-    log4Debug(@"BLE-Device: disconnected from %@", self.peripheral.name);
+    DDLogDebug(@"BLE-Device: disconnected from %@", self.peripheral.name);
   }
   
   [self disconnected:sfError];
@@ -407,12 +410,12 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
   if ( (_batteryReadBlock || self.automaticBatteryNotify) && [characteristic.UUID isEqual:[CBUUID UUIDWithString:kBLECharBatteryLevel]]) {
     UInt8 batteryLevel = 0;
     [incomingData getBytes:&batteryLevel length:sizeof(batteryLevel)];
-    log4Debug(@"BLE-Device: incoming battery level %d%%", batteryLevel);
+    DDLogDebug(@"BLE-Device: incoming battery level %d%%", batteryLevel);
     NSNumber* batteryLevelNum = @(batteryLevel);
     DISPATCH_ON_MAIN_QUEUE(if (self.shouldLink) self.batteryLevel = batteryLevelNum);
   }
   else {
-    log4Debug(@"BLE-Device: incoming data for %@: %@", characteristic.UUID, incomingData);
+    DDLogDebug(@"BLE-Device: incoming data for %@: %@", characteristic.UUID, incomingData);
     DISPATCH_ON_MAIN_QUEUE(
                            if (self.shouldLink) {
                              [self.delegate device:self receivedData:incomingData fromCharacteristic:characteristic.UUID];
@@ -456,12 +459,12 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
     
     if (batteryLevelCharacteristicSupportsIndication || batteryLevelCharacteristicSupportsNotification)
     {
-      log4Info(@"BLE-Device: subscribing to battery characteristic");
+      DDLogInfo(@"BLE-Device: subscribing to battery characteristic");
       self.automaticBatteryNotify = YES;
       [self subscribeToCharacteristic:batteryLevelCharacteristicUUID];
     }
     else {
-      log4Info(@"BLE-Device: beginning regular read of battery level");
+      DDLogInfo(@"BLE-Device: beginning regular read of battery level");
       [self readBatteryLevelAndScheduleNext];
     }
   }
@@ -490,7 +493,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
   [self invalidateBatteryTimer];
   
   if (self.linked) {
-    log4Debug(@"BLE-Device: scheduling battery level read");
+    DDLogDebug(@"BLE-Device: scheduling battery level read");
     [self readValueForCharacteristic:[CBUUID UUIDWithString:kBLECharBatteryLevel]];
     [self scheduleBatteryTimer];
   }

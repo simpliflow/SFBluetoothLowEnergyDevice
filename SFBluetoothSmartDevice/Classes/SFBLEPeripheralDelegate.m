@@ -7,7 +7,7 @@
 
 
 #import "SFBLEPeripheralDelegate.h"
-#import "Log4Cocoa.h"
+#import "DDLog.h"
 #import "SpacemanBlocks.h"
 
 #import "SFBLEDeviceManager.h"
@@ -30,6 +30,9 @@
 @property (nonatomic) NSMutableDictionary* servicesByUUID;
 
 @end
+
+
+static const int ddLogLevel = LOG_LEVEL_INFO;
 
 
 
@@ -99,7 +102,7 @@
 
 - (void)discoveryTimedOut
 {
-  log4Debug(@"BLE-PeripheralDelegate: discovery timed out");
+  DDLogDebug(@"BLE-PeripheralDelegate: discovery timed out");
   [self invalidateDiscoveryTimer];
   [self.device discoveryTimedOut];
 }
@@ -111,7 +114,7 @@
   
   for (CBService* service in services) {
     NSArray* characteristicsToDiscover = self.servicesAndCharacteristics[service.UUID];
-    log4Debug(@"BLE-PeripheralDelegate: starting characteristic discovery for service %@: %@", service.UUID, [[characteristicsToDiscover valueForKeyPath:@"description"] componentsJoinedByString:@", "]);
+    DDLogDebug(@"BLE-PeripheralDelegate: starting characteristic discovery for service %@: %@", service.UUID, [[characteristicsToDiscover valueForKeyPath:@"description"] componentsJoinedByString:@", "]);
     [peripheral discoverCharacteristics:characteristicsToDiscover forService:service];
   }
 }
@@ -120,11 +123,11 @@
 - (void)peripheral:(CBPeripheral*)peripheral didDiscoverCharacteristicsForService:(CBService*)service error:(NSError*)error
 {
   if (error) {
-    log4Info(@"BLE-PeripheralDelegate: error in characteristic discovery: %@ %@", [error localizedDescription], error);
+    DDLogInfo(@"BLE-PeripheralDelegate: error in characteristic discovery: %@ %@", [error localizedDescription], error);
     return;
   }
   
-  log4Debug(@"BLE-PeripheralDelegate: did discover characteristics for service %@", service.UUID);
+  DDLogDebug(@"BLE-PeripheralDelegate: did discover characteristics for service %@", service.UUID);
 
   self.servicesByUUID[service.UUID] = service;
   
@@ -179,7 +182,7 @@
 - (void)peripheral:(CBPeripheral*)peripheral didUpdateNotificationStateForCharacteristic:(CBCharacteristic*)characteristic error:(NSError*)error
 {
   if (error) {
-    log4Warn(@"BLE-PeripheralDelegate: updated notification state with error: %@", [error localizedDescription], error);
+    DDLogWarn(@"BLE-PeripheralDelegate: updated notification state with error: %@", error);
     return;
   }
 }
@@ -188,7 +191,7 @@
 - (void)peripheral:(CBPeripheral*)peripheral didUpdateValueForCharacteristic:(CBCharacteristic*)characteristic error:(NSError*)error
 {
   if (error) {
-    log4Warn(@"error: %@ %@", [error localizedDescription], error);
+    DDLogWarn(@"error: %@ %@", [error localizedDescription], error);
     return;
   }
   

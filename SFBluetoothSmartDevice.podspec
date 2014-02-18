@@ -9,7 +9,7 @@ Pod::Spec.new do |spec|
   spec.authors      = 'Thomas Billicsich'
   spec.source_files     = 'SFBluetoothSmartDevice/Classes/*.{h,m}'
   spec.source     = { :git => 'https://github.com/simpliflow/SFBluetoothSmartDevice.git', :tag => 'v0.5.1' }
-  spec.dependency  'Log4Cocoa'
+  spec.dependency  'CocoaLumberjack'
   spec.framework  = 'CoreBluetooth'
   spec.requires_arc = true
 
