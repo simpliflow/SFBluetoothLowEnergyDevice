@@ -51,7 +51,7 @@ static dispatch_queue_t __bleQueue;
   static dispatch_once_t once;
   dispatch_once(&once, ^{
     __bleQueue = dispatch_queue_create("com.simpliflow_ble.queue", DISPATCH_QUEUE_SERIAL);
-    [[L4Logger rootLogger] setLevel:[L4Level all]];
+    [[L4Logger rootLogger] setLevel:[L4Level info]];
     if ([L4Logger rootLogger].allAppenders.count == 0) {
       [[L4Logger rootLogger] addAppender: [[L4ConsoleAppender alloc] initTarget:YES withLayout: [L4Layout simpleLayout]]];
     }
