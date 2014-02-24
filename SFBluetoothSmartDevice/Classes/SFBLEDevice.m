@@ -97,6 +97,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 {
   if (self = [super init]) {
     _peripheral = peripheral;
+    _identifier = peripheral.identifier;
     _centralDelegate = centralDelegate;
     _servicesAndCharacteristics = servicesAndCharacteristics;
   }
