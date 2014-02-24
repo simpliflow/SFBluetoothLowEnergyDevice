@@ -50,6 +50,7 @@ statement; \
 @property (atomic) BOOL shouldLink;
 @property (atomic) BOOL linking;
 @property (atomic) BOOL linked;
+@property (atomic) BOOL unlinking;
 
 @property (atomic) BOOL automaticBatteryNotify;
 
@@ -141,11 +142,16 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 }
 
 
+// Unlinking does not report a successful disconnection to the outside, but
+// nonetheless it has to keep track of the current state of the link.
 - (void)unlink
 {
   DDLogDebug(@"BLE-Device: starting unlink");
   
   if (!self.shouldLink)
+    return;
+  
+  if (self.unlinking)
     return;
 
   self.shouldLink = NO;
@@ -153,16 +159,19 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
                         NSAssert(!(self.linking && self.linked), @"This should not happen.");
                         
                         if (self.linking) {
-                          [self invalidateConnectTimer];
-                          [self.centralDelegate cancelConnectionToDevice:self];
-
-                          [self.peripheralDelegate invalidateDiscoveryTimer];
                           self.linking = NO;
+                          [self invalidateConnectTimer];
+                          [self.peripheralDelegate invalidateDiscoveryTimer];
+
+                          self.unlinking = YES;
+                          [self.centralDelegate cancelConnectionToDevice:self];
                         }
                         
                         if (self.linked) {
-                          [self.centralDelegate cancelConnectionToDevice:self];
                           self.linked = NO;
+                          
+                          self.unlinking = YES;
+                          [self.centralDelegate cancelConnectionToDevice:self];
                         }
   );
 }
@@ -174,13 +183,18 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
   
   self.linking = NO;
   self.linked = YES;
+  self.unlinking = NO;
   [self checkForAndSubscribeToBatteryCharacteristic];
   
   DISPATCH_ON_MAIN_QUEUE(
                          
                          if (!self.shouldLink) {
-                           [self.centralDelegate cancelConnectionToDevice:self];
-                           self.linked = NO;
+                           DISPATCH_ON_BLE_QUEUE(
+                                                 self.linked = NO;
+                                                 
+                                                 self.unlinking = YES;
+                                                 [self.centralDelegate cancelConnectionToDevice:self];
+                                                 );
                            return;
                          }
                          
@@ -189,6 +203,8 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 }
 
 
+// Errors: connection CBError, connection timeout, discovery timeout,
+//            discovery CBError
 - (void)linkingFailed:(NSError*)SFError
 {
   DDLogDebug(@"BLE-Device: linking failed");
@@ -199,6 +215,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 
   self.linking = NO;
   self.linked = NO;
+  self.unlinking = NO;
   DISPATCH_ON_MAIN_QUEUE(
                          if (!self.shouldLink)
                          return;
@@ -209,6 +226,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 }
 
 
+// Callers: no bluetooth, didDisconnectPeripheral,
 - (void)disconnected:(NSError*)SFError
 {
   DDLogDebug(@"BLE-Device: disconnected");
@@ -229,6 +247,18 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
                            self.shouldLink = NO;
                            [self.delegate device:self unlinked:SFError];
                            );
+  }
+  else if (self.unlinking) {
+    self.unlinking = NO;
+    DISPATCH_ON_MAIN_QUEUE(
+                           // -unlink has been called, and before the disconnect has been confirmed by the
+                           // central manager -link was called.
+                           if (self.shouldLink) {
+                             self.linking = YES;
+                             [self connect];
+                           }
+                           );
+    
   }
 }
 
@@ -332,7 +362,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 - (void)discoveryTimedOut
 {
   DDLogInfo(@"BLE-Device: discovery timed out. Reporting error.");
-  // the connection does not time out automatically, we have to do this explicitly
+  // a connectToPeripheral: does not time out, we have to cancel explicitly
   [self.centralDelegate cancelConnectionToDevice:self];
   
   [self linkingFailed:[SFBLEDeviceManager error:SFBluetoothSmartErrorProblemsInDiscoveryProcess]];
