@@ -414,6 +414,15 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 }
 
 
+- (void)writeValue:(NSData*)value forCharacteristic:(CBUUID*)characteristicUUID
+{
+  if (!self.linked)
+    return;
+  
+  [self.peripheralDelegate writeValue:value forCharacteristic:characteristicUUID];
+}
+
+
 - (void)subscribeToCharacteristic:(CBUUID*)characteristicUUID
 {
   if (!self.linked)

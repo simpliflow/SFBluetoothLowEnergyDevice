@@ -165,6 +165,14 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 }
 
 
+- (void)writeValue:(NSData*)value forCharacteristic:(CBUUID*)characteristicUUID
+{
+  // TODO: allow for both types of writing (w/ and w/o response)
+  CBCharacteristic* characteristic = self.characteristicsByUUID[characteristicUUID];
+  [self.device.peripheral writeValue:value forCharacteristic:characteristic type:CBCharacteristicWriteWithResponse];
+}
+
+
 - (void)subscribeToCharacteristic:(CBUUID*)characteristicUUID
 {
   CBCharacteristic* characteristic = self.characteristicsByUUID[characteristicUUID];
