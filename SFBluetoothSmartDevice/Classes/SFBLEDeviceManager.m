@@ -199,17 +199,10 @@ static dispatch_queue_t __bleQueue;
 
   [self executeStoppingScanDuties];
   
-  if (self.discoveredDevices.count == 0) {
-    NSError* bleError = nil;
-    if (self.identifierToScanFor) {
-      DDLogInfo(@"BLE-Manager: scan timed out. Specific device not found");
-      bleError = [SFBLEDeviceManager error:SFBluetoothSmartErrorSpecificDeviceNotFound];
-    }
-    else {
-      DDLogInfo(@"BLE-Manager: scan timed out. No device found");
-      bleError = [SFBLEDeviceManager error:SFBluetoothSmartErrorNoDeviceFound];
-    }
-    
+  if (self.identifierToScanFor) {
+    DDLogInfo(@"BLE-Manager: scan timed out. Specific device not found");
+    NSError* bleError;
+    bleError = [SFBLEDeviceManager error:SFBluetoothSmartErrorSpecificDeviceNotFound];
     DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate managerStoppedScanWithError:bleError]);
   }
   else {

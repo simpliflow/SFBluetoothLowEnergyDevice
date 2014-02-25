@@ -54,11 +54,11 @@ typedef NS_ENUM(NSInteger, SFBluetoothSmartError) {
 
 @protocol SFBLEDeviceManagerDelegate
 
-// called at the end of the timeout if at least one suitable device has been
-// found.
+// called at the end of the timeout, with all devices that have been found (may be an
+// empty array)
 - (void)managerFoundDevices:(NSArray*)bleDevices;
-// called at the end of the timeout if any suitable device or the specific
-// device has not been found.
+// called at the end of the timeout if the specific
+// device has not been found or in between if an error surfaced.
 // If Bluetooth goes to off while scanning, you will get managerStoppedScanWithError: with
 // a no bluetooth error and bluetoothNotAvailable will also be called.
 - (void)managerStoppedScanWithError:(NSError*)error;
