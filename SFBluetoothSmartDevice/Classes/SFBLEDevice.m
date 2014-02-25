@@ -136,6 +136,9 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
                         if (self.linking)
                         return;
                         
+                        if (self.unlinking)
+                        return;
+                        
                         self.linking = YES;
                         [self connect];
                         );
