@@ -505,6 +505,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
       DDLogInfo(@"BLE-Device: subscribing to battery characteristic");
       self.automaticBatteryNotify = YES;
       [self subscribeToCharacteristic:batteryLevelCharacteristicUUID];
+      [self readValueForCharacteristic:[CBUUID UUIDWithString:kBLECharBatteryLevel]];
     }
     else {
       DDLogInfo(@"BLE-Device: beginning regular read of battery level");
