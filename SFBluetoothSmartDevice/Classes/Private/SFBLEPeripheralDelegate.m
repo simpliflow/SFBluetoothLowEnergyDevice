@@ -114,7 +114,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
   
   for (CBService* service in services) {
     NSArray* characteristicsToDiscover = self.servicesAndCharacteristics[service.UUID];
-    DDLogDebug(@"BLE-PeripheralDelegate: starting characteristic discovery for service %@: %@", service.UUID, [[characteristicsToDiscover valueForKeyPath:@"description"] componentsJoinedByString:@", "]);
+//    DDLogDebug(@"BLE-PeripheralDelegate: starting characteristic discovery for service %@: %@", service.UUID, [[characteristicsToDiscover valueForKeyPath:@"description"] componentsJoinedByString:@", "]);
     [peripheral discoverCharacteristics:characteristicsToDiscover forService:service];
   }
 }
@@ -127,7 +127,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     return;
   }
   
-  DDLogDebug(@"BLE-PeripheralDelegate: did discover characteristics for service %@", service.UUID);
+//  DDLogDebug(@"BLE-PeripheralDelegate: did discover all characteristics for service %@", service.UUID);
 
   self.servicesByUUID[service.UUID] = service;
   
