@@ -5,15 +5,19 @@
 //  Created by Thomas Billicsich on 2014-01-13.
 //  Copyright (c) 2014 Thomas Billicsich. All rights reserved.
 
-
 #import "SFBLEDeviceManager.h"
-#import "SpacemanBlocks.h"
+#import "SFBLEDeviceManagerPrivate.h"
+
 #import "DDLog.h"
 #import "DDTTYLogger.h"
 #import "SFConsoleLogFormat.h"
+static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 #import "SFBLEDevice.h"
+#import "SFBLEDevicePrivate.h"
 #import "SFBLECentralManagerDelegate.h"
+
+
 
 
 #define DISPATCH_ON_MAIN_QUEUE(statement) do { \
@@ -24,26 +28,6 @@ statement; \
 dispatch_async(SFBLEDeviceManager.bleQueue, ^{ \
 statement; \
 }); } while(0)
-
-
-@interface SFBLEDeviceManager () {
-  __block SMDelayedBlockHandle _scanTimeoutBlock;
-}
-
-@property (nonatomic) NSMutableDictionary* discoveredDevices;
-@property (nonatomic, copy) NSUUID* identifierToScanFor;
-@property (atomic) BOOL shouldScan;
-@property (nonatomic) NSTimeInterval scanTimeout;
-
-@property (readwrite) NSDictionary* servicesAndCharacteristics;
-@property (nonatomic, copy) NSArray* advertisedServices;
-@property (nonatomic) SFBLECentralManagerDelegate* centralDelegate;
-
-@property (atomic) BOOL bluetoothIsNotAvailable;
-@end
-
-
-static const int ddLogLevel = LOG_LEVEL_INFO;
 
 
 

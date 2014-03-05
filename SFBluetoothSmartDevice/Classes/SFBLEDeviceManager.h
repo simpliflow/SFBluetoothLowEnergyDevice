@@ -39,14 +39,6 @@ typedef NS_ENUM(NSInteger, SFBluetoothSmartError) {
 - (void)stopScan;
 
 
-// # Private
-+ (dispatch_queue_t)bleQueue;
-// SFBLECentralManagerDelegate
-- (void)didDiscoverPeripheral:(CBPeripheral*)peripheral RSSI:(NSNumber*)RSSI;
-- (void)bluetoothNotAvailable;
-- (void)bluetoothAvailableAgain;
-// SFBLEDevice
-@property (nonatomic, readonly) NSDictionary* servicesAndCharacteristics;
 @end
 
 

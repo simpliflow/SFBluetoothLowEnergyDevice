@@ -68,7 +68,7 @@
     default             : logLevel = @"VRB"; break;
   }
 
-  // for the record, in case a simple file name is needed
+  // for the record in case a simple file name is needed
   // NSString* simpleFilename = DDExtractFileNameWithoutExtension(logMessage->file, NO);
   
   NSString* dateString = [self stringFromDate:(logMessage->timestamp)];

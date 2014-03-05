@@ -7,11 +7,15 @@
 
 
 #import "SFBLEPeripheralDelegate.h"
-#import "DDLog.h"
 #import "SpacemanBlocks.h"
 
+#import "DDLog.h"
+static const int ddLogLevel = LOG_LEVEL_DEBUG;
+
 #import "SFBLEDeviceManager.h"
+#import "SFBLEDeviceManagerPrivate.h"
 #import "SFBLEDevice.h"
+#import "SFBLEDevicePrivate.h"
 
 
 #define DISCOVERY_TIMEOUT 2.0
@@ -32,7 +36,6 @@
 @end
 
 
-static const int ddLogLevel = LOG_LEVEL_INFO;
 
 
 

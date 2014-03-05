@@ -5,13 +5,11 @@
 //  Created by Thomas Billicsich on 2014-01-13.
 //  Copyright (c) 2014 Thomas Billicsich. All rights reserved.
 
-
 #import <Foundation/Foundation.h>
 #import <CoreBluetooth/CoreBluetooth.h>
 
-
 @protocol SFBLEDeviceDelegate;
-@class SFBLEDeviceManager, SFBLECentralManagerDelegate;
+@class SFBLEDeviceManager;
 
 
 
@@ -25,7 +23,7 @@
 - (void)unlink;
 
 @property (nonatomic, readonly) NSString* name;
-@property (nonatomic, readonly) NSUUID* identifier;
+@property (nonatomic, readonly) NSUUID*   identifier;
 /// Battery level of device in percent (100 is fully charged, 0 is fully discharged)
 @property (nonatomic, readonly) NSNumber* batteryLevel;
 
@@ -33,23 +31,6 @@
 - (void)writeValue:(NSData*)value forCharacteristic:(CBUUID*)characteristicUUID;
 - (void)subscribeToCharacteristic:(CBUUID*)characteristicUUID;
 - (void)unsubscribeFromCharacteristic:(CBUUID*)characteristicUUID;
-
-
-// # Private
-// SFBLEDeviceManager
-+ (instancetype)deviceWithPeripheral:(CBPeripheral*)peripheral centralDelegate:(SFBLECentralManagerDelegate*)centralDelegate servicesAndCharacteristics:(NSDictionary*)servicesAndCharacteristics;
-
-// SFBLECentralManagerDelegate
-@property (nonatomic) CBPeripheral* peripheral;
-- (void)didConnectPeripheral:(CBPeripheral*)peripheral;
-- (void)didFailToConnectPeripheral:(CBPeripheral*)peripheral error:(NSError*)error;
-- (void)didDisconnectPeripheral:(CBPeripheral*)peripheral error:(NSError*)error;
-- (void)bluetoothNotAvailable;
-
-// SFBLEPeripheralDelegate
-- (void)completedDiscovery;
-- (void)discoveryTimedOut;
-- (void)didUpdateValueForCharacteristic:(CBCharacteristic*)characteristic error:(NSError*)error;
 
 @end
 

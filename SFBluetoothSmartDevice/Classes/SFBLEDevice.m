@@ -7,10 +7,13 @@
 
 
 #import "SFBLEDevice.h"
-#import "SpacemanBlocks.h"
+#import "SFBLEDevicePrivate.h"
+
 #import "DDLog.h"
+static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 #import "SFBLEDeviceManager.h"
+#import "SFBLEDeviceManagerPrivate.h"
 #import "SFBLECentralManagerDelegate.h"
 #import "SFBLEPeripheralDelegate.h"
 
@@ -30,37 +33,6 @@ statement; \
 // Constants for automatic battery state retrieval
 #define kBLEServiceBattery @"180F"
 #define kBLECharBatteryLevel @"2A19"
-
-
-
-
-
-@interface SFBLEDevice () {
-  __block SMDelayedBlockHandle _connectTimeoutBlock;
-  __block SMDelayedBlockHandle _batteryReadBlock;
-}
-
-// Private Vars
-@property (nonatomic, readonly) dispatch_queue_t bleQueue;
-
-@property (nonatomic, assign) SFBLECentralManagerDelegate* centralDelegate;
-@property (nonatomic) SFBLEPeripheralDelegate* peripheralDelegate;
-@property (nonatomic) NSDictionary* servicesAndCharacteristics;
-
-@property (atomic) BOOL shouldLink;
-@property (atomic) BOOL linking;
-@property (atomic) BOOL linked;
-@property (atomic) BOOL unlinking;
-
-@property (atomic) BOOL automaticBatteryNotify;
-
-// Public Vars
-@property (readwrite) NSNumber* batteryLevel;
-
-@end
-
-
-static const int ddLogLevel = LOG_LEVEL_INFO;
 
 
 
