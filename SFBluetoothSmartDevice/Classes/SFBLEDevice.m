@@ -438,7 +438,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
     DISPATCH_ON_MAIN_QUEUE(if (self.shouldLink) self.batteryLevel = batteryLevelNum);
   }
   else {
-    DDLogDebug(@"BLE-Device: incoming data for %@: %@", characteristic.UUID, incomingData);
+    DDLogDebug(@"BLE-Device: incoming data via %@: %@", characteristic.UUID, incomingData);
     DISPATCH_ON_MAIN_QUEUE(
                            if (self.shouldLink) {
                              [self.delegate device:self receivedData:incomingData fromCharacteristic:characteristic.UUID];
