@@ -216,8 +216,9 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
   else if (self.linked) {
     self.linked = NO;
     DISPATCH_ON_MAIN_QUEUE(
-                           if (!self.shouldLink)
-                           return;
+                           if (!self.shouldLink) {
+                             return;
+                           }
                            
                            self.shouldLink = NO;
                            [self.delegate device:self unlinked:SFError];
@@ -229,8 +230,16 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
                            // -unlink has been called, and before the disconnect has been confirmed by the
                            // central manager -link was called.
                            if (self.shouldLink) {
-                             self.linking = YES;
-                             [self connect];
+                             DISPATCH_ON_BLE_QUEUE(
+                                                   // If the link call that switched shouldLink to YES, happended after
+                                                   // unlinking was set to NO. Then the linking already started!
+                                                   if (self.linking) {
+                                                     return;
+                                                   }
+                                                   
+                                                   self.linking = YES;
+                                                   [self connect];
+                                                   );
                            }
                            );
     
