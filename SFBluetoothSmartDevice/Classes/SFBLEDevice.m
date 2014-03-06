@@ -382,37 +382,45 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 
 - (void)readValueForCharacteristic:(CBUUID*)characteristicUUID
 {
-  if (!self.linked)
-    return;
-  
-  [self.peripheralDelegate readValueForCharacteristic:characteristicUUID];
+  DISPATCH_ON_BLE_QUEUE(
+                        if (!self.linked)
+                        return;
+                        
+                        [self.peripheralDelegate readValueForCharacteristic:characteristicUUID];
+                        );
 }
 
 
 - (void)writeValue:(NSData*)value forCharacteristic:(CBUUID*)characteristicUUID
 {
-  if (!self.linked)
-    return;
-  
-  [self.peripheralDelegate writeValue:value forCharacteristic:characteristicUUID];
+  DISPATCH_ON_BLE_QUEUE(
+                        if (!self.linked)
+                        return;
+                        
+                        [self.peripheralDelegate writeValue:value forCharacteristic:characteristicUUID];
+                        );
 }
 
 
 - (void)subscribeToCharacteristic:(CBUUID*)characteristicUUID
 {
-  if (!self.linked)
-    return;
-  
-  [self.peripheralDelegate subscribeToCharacteristic:characteristicUUID];
+  DISPATCH_ON_BLE_QUEUE(
+                        if (!self.linked)
+                        return;
+                        
+                        [self.peripheralDelegate subscribeToCharacteristic:characteristicUUID];
+                        );
 }
 
 
 - (void)unsubscribeFromCharacteristic:(CBUUID*)characteristicUUID
 {
-  if (!self.linked)
-    return;
-  
-  [self.peripheralDelegate unsubscribeFromCharacteristic:characteristicUUID];
+  DISPATCH_ON_BLE_QUEUE(
+                        if (!self.linked)
+                        return;
+                        
+                        [self.peripheralDelegate unsubscribeFromCharacteristic:characteristicUUID];
+                        );
 }
 
 
