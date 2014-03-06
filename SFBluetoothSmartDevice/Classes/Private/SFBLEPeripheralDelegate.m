@@ -193,7 +193,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 - (void)peripheral:(CBPeripheral*)peripheral didUpdateNotificationStateForCharacteristic:(CBCharacteristic*)characteristic error:(NSError*)error
 {
   if (error) {
-    DDLogWarn(@"BLE-PeripheralDelegate: updated notification state with error: %@", error);
+    DDLogWarn(@"BLE-PeripheralDelegate: updated notification state of %@ with error: %@", characteristic, error);
     return;
   }
 }
