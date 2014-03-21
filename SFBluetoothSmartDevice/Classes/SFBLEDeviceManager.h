@@ -36,6 +36,7 @@ typedef NS_ENUM(NSInteger, SFBluetoothSmartError) {
 
 /// Followed by managerFoundDevices: or managerAbortedScanWithError
 - (void)scanFor:(NSUUID*)identifier timeout:(NSTimeInterval)timeout;
+- (void)scanForName:(NSString*)name timeout:(NSTimeInterval)timeout;
 - (void)stopScan;
 
 

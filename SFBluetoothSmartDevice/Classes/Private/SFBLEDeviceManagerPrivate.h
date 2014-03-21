@@ -17,6 +17,7 @@
 
 @property (nonatomic) NSMutableDictionary* discoveredDevices;
 @property (nonatomic, copy) NSUUID* identifierToScanFor;
+@property (nonatomic, copy) NSString* nameToScanFor;
 @property (atomic) BOOL shouldScan;
 @property (nonatomic) NSTimeInterval scanTimeout;
 

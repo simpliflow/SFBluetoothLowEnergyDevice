@@ -162,10 +162,36 @@ static dispatch_queue_t __bleQueue;
                           [self startScanTimer];
                         }
                         self.identifierToScanFor = identifier;
+                        self.nameToScanFor = nil;
                         self.discoveredDevices = [@{} mutableCopy];
                         [self.centralDelegate scanForPeripheralsAdvertising:self.advertisedServices];
   );
 }
+
+
+- (void)scanForName:(NSString*)name timeout:(NSTimeInterval)timeout
+{
+  if (self.shouldScan)
+    return;
+  
+  if (self.bluetoothIsNotAvailable) {
+    DISPATCH_ON_MAIN_QUEUE([self.delegate managerStoppedScanWithError:[SFBLEDeviceManager error:SFBluetoothSmartErrorNoBluetooth]]);
+    return;
+  }
+  
+  self.shouldScan = YES;
+  DISPATCH_ON_BLE_QUEUE(
+                        if (timeout > 0) {
+                          self.scanTimeout = timeout;
+                          [self startScanTimer];
+                        }
+                        self.nameToScanFor = name;
+                        self.identifierToScanFor = nil;
+                        self.discoveredDevices = [@{} mutableCopy];
+                        [self.centralDelegate scanForPeripheralsAdvertising:self.advertisedServices];
+                        );
+}
+
 
 
 - (void)startScanTimer
@@ -191,7 +217,7 @@ static dispatch_queue_t __bleQueue;
 
   [self executeStoppingScanDuties];
   
-  if (self.identifierToScanFor) {
+  if (self.identifierToScanFor || self.nameToScanFor) {
     DDLogInfo(@"BLE-Manager: scan timed out. Specific device not found");
     NSError* bleError;
     bleError = [SFBLEDeviceManager error:SFBluetoothSmartErrorSpecificDeviceNotFound];
@@ -214,14 +240,15 @@ static dispatch_queue_t __bleQueue;
   if (RSSI.integerValue == 127)
     return;
   
-  if ([self.identifierToScanFor isEqual:peripheral.identifier]) {
+  if ( (self.identifierToScanFor && [self.identifierToScanFor isEqual:peripheral.identifier]) ||
+      (self.nameToScanFor && [self.nameToScanFor isEqualToString:peripheral.name]) ) {
     DDLogDebug(@"BLE-Manager: did discover suitable peripheral: %@", peripheral);
     [self executeStoppingScanDuties];
     
     SFBLEDevice* suitableDevice = [SFBLEDevice deviceWithPeripheral:peripheral centralDelegate:self.centralDelegate servicesAndCharacteristics:self.servicesAndCharacteristics];
     DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate managerFoundDevices:@[suitableDevice]]);
   }
-  else if (!self.identifierToScanFor) {
+  else if (!self.identifierToScanFor && !self.nameToScanFor) {
     if (![self.discoveredDevices.allKeys containsObject:peripheral.identifier]) {
       DDLogInfo(@"BLE-Manager: new suitable peripheral %p (%@, %@). RSSI: %@", peripheral, peripheral.identifier, peripheral.name, RSSI);
       self.discoveredDevices[peripheral.identifier] = [SFBLEDevice deviceWithPeripheral:peripheral centralDelegate:self.centralDelegate servicesAndCharacteristics:self.servicesAndCharacteristics];
