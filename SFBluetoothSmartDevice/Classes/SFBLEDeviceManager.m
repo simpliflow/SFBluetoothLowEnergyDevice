@@ -107,7 +107,7 @@ static dispatch_queue_t __bleQueue;
     //  to be of the class CBUUID.
     NSArray* characteristics = [servicesAndCharacteristics.allValues valueForKeyPath:@"@unionOfArrays.self"];
     for (NSArray* shouldBeUUIDs in @[servicesAndCharacteristics.allKeys, characteristics, advertisedServices]) {
-      for (id shouldBeUUID in servicesAndCharacteristics.allKeys) {
+      for (id shouldBeUUID in shouldBeUUIDs) {
         if (![shouldBeUUID isKindOfClass:[CBUUID class]])
           return nil;
       }
