@@ -106,7 +106,15 @@ static dispatch_queue_t __bleQueue;
     //   * the services that are expected to be advertised
     //  to be of the class CBUUID.
     NSArray* characteristics = [servicesAndCharacteristics.allValues valueForKeyPath:@"@unionOfArrays.self"];
-    for (NSArray* shouldBeUUIDs in @[servicesAndCharacteristics.allKeys, characteristics, advertisedServices]) {
+    
+    // advertisedServices may be nil
+    NSArray* toBeTested;
+    if (advertisedServices)
+      toBeTested = @[servicesAndCharacteristics.allKeys, characteristics, advertisedServices];
+    else
+      toBeTested = @[servicesAndCharacteristics.allKeys, characteristics];
+    
+    for (NSArray* shouldBeUUIDs in toBeTested) {
       for (id shouldBeUUID in shouldBeUUIDs) {
         if (![shouldBeUUID isKindOfClass:[CBUUID class]])
           return nil;
