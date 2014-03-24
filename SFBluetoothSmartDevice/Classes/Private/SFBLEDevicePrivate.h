@@ -11,6 +11,12 @@
 #import "SFBLEPeripheralDelegate.h"
 
 
+typedef NS_ENUM(NSInteger, SFBLEDeviceState) {
+  SFBLEDeviceStateUnlinked = 0,
+  SFBLEDeviceStateLinking,
+  SFBLEDeviceStateLinked,
+  SFBLEDeviceStateUnlinking
+};
 
 
 @interface SFBLEDevice () {
@@ -27,9 +33,7 @@
 @property (nonatomic) NSDictionary* servicesAndCharacteristics;
 
 @property (atomic) BOOL shouldLink;
-@property (atomic) BOOL linking;
-@property (atomic) BOOL linked;
-@property (atomic) BOOL unlinking;
+@property (atomic) SFBLEDeviceState state;
 
 @property (atomic) BOOL automaticBatteryNotify;
 

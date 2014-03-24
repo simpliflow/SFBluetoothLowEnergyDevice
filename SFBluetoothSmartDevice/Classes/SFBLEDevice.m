@@ -73,6 +73,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
     _identifier = peripheral.identifier;
     _centralDelegate = centralDelegate;
     _servicesAndCharacteristics = servicesAndCharacteristics;
+    _state = SFBLEDeviceStateUnlinked;
   }
   return self;
 }
@@ -98,26 +99,27 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 
   if (self.shouldLink)
     return;
+  
   self.shouldLink = YES;
   DISPATCH_ON_BLE_QUEUE(
-                        NSAssert(!(self.linking && self.linked), @"This should not happen.");
-
-                        if (self.linked)
-                        return;
-                        
-                        if (self.linking)
-                        return;
-                        
-                        if (self.unlinking)
-                        return;
-                        
-                        self.linking = YES;
-                        [self connect];
+                        switch (self.state)
+                        {
+                          case SFBLEDeviceStateUnlinked:
+                            self.state = SFBLEDeviceStateLinking;
+                            [self connect];
+                            break;
+                            
+                          case SFBLEDeviceStateUnlinking:
+                          case SFBLEDeviceStateLinked:
+                          case SFBLEDeviceStateLinking:
+                            DDLogDebug(@"BLE-Device: state on \"link\" is %d", self.state);
+                            break;
+                        }
                         );
 }
 
 
-// Unlinking does not report a successful disconnection to the outside, but
+// Unlinking does not report a successful disconnection to the outside,
 // nonetheless it has to keep track of the current state of the link.
 - (void)unlink
 {
@@ -126,54 +128,43 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
   if (!self.shouldLink)
     return;
   
-  if (self.unlinking)
-    return;
-
   self.shouldLink = NO;
   DISPATCH_ON_BLE_QUEUE(
-                        NSAssert(!(self.linking && self.linked), @"This should not happen.");
-                        
-                        if (self.linking) {
-                          self.linking = NO;
-                          [self invalidateConnectTimer];
-                          [self.peripheralDelegate invalidateDiscoveryTimer];
-
-                          self.unlinking = YES;
-                          [self.centralDelegate cancelConnectionToDevice:self];
+                        switch (self.state)
+                        {
+                          case SFBLEDeviceStateLinking:
+                            [self invalidateConnectTimer];
+                            [self.peripheralDelegate invalidateDiscoveryTimer];
+                            // break is left out on purpose
+                          case SFBLEDeviceStateLinked:
+                            self.state = SFBLEDeviceStateUnlinking;
+                            [self.centralDelegate cancelConnectionToDevice:self];
+                            break;
+                            
+                          case SFBLEDeviceStateUnlinking:
+                          case SFBLEDeviceStateUnlinked:
+                            break;
                         }
-                        
-                        if (self.linked) {
-                          self.linked = NO;
-                          
-                          self.unlinking = YES;
-                          [self.centralDelegate cancelConnectionToDevice:self];
-                        }
-  );
+                        );
 }
 
 
 - (void)linkingComplete
 {
-  NSAssert(!(self.linking && self.linked), @"This should not happen.");
-  
-  self.linking = NO;
-  self.linked = YES;
-  self.unlinking = NO;
+  self.state = SFBLEDeviceStateLinked;
+
   [self checkForAndSubscribeToBatteryCharacteristic];
   
   DISPATCH_ON_MAIN_QUEUE(
-                         
                          if (!self.shouldLink) {
                            DISPATCH_ON_BLE_QUEUE(
-                                                 self.linked = NO;
-                                                 
-                                                 self.unlinking = YES;
+                                                 self.state = SFBLEDeviceStateUnlinking;
                                                  [self.centralDelegate cancelConnectionToDevice:self];
                                                  );
-                           return;
                          }
-                         
-                         [self.delegate deviceLinkedSuccessfully:self];
+                         else {
+                           [self.delegate deviceLinkedSuccessfully:self];
+                         }
                          );
 }
 
@@ -184,19 +175,15 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 {
   DDLogDebug(@"BLE-Device: linking failed");
 
-  NSAssert(!(self.linking && self.linked), @"This should not happen.");
   if (SFError)
     NSAssert([SFError.domain isEqualToString:[SFBLEDeviceManager error:SFBluetoothSmartErrorUnknown].domain], @"Apple error leaking to outside");
 
-  self.linking = NO;
-  self.linked = NO;
-  self.unlinking = NO;
+  self.state = SFBLEDeviceStateUnlinked;
   DISPATCH_ON_MAIN_QUEUE(
-                         if (!self.shouldLink)
-                         return;
-                         
-                         self.shouldLink = NO;
-                         [self.delegate device:self failedToLink:SFError];
+                         if (self.shouldLink) {
+                           self.shouldLink = NO;
+                           [self.delegate device:self failedToLink:SFError];
+                         }
   );
 }
 
@@ -206,43 +193,50 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 {
   DDLogDebug(@"BLE-Device: disconnected");
 
-  NSAssert(!(self.linking && self.linked), @"This should not happen.");
   if (SFError)
     NSAssert([SFError.domain isEqualToString:[SFBLEDeviceManager error:SFBluetoothSmartErrorUnknown].domain], @"Apple error leaking to outside");
-
-  if (self.linking) {
-    [self linkingFailed:SFError];
-  }
-  else if (self.linked) {
-    self.linked = NO;
-    DISPATCH_ON_MAIN_QUEUE(
-                           if (!self.shouldLink) {
-                             return;
-                           }
-                           
-                           self.shouldLink = NO;
-                           [self.delegate device:self unlinked:SFError];
-                           );
-  }
-  else if (self.unlinking) {
-    self.unlinking = NO;
-    DISPATCH_ON_MAIN_QUEUE(
-                           // -unlink has been called, and before the disconnect has been confirmed by the
-                           // central manager -link was called.
-                           if (self.shouldLink) {
-                             DISPATCH_ON_BLE_QUEUE(
-                                                   // If the link call that switched shouldLink to YES, happended after
-                                                   // unlinking was set to NO. Then the linking already started!
-                                                   if (self.linking) {
-                                                     return;
-                                                   }
-                                                   
-                                                   self.linking = YES;
-                                                   [self connect];
-                                                   );
-                           }
-                           );
-    
+  
+  switch (self.state) {
+    case SFBLEDeviceStateLinking:
+      self.state = SFBLEDeviceStateUnlinked;
+      [self linkingFailed:SFError];
+      break;
+      
+    case SFBLEDeviceStateLinked:
+      self.state = SFBLEDeviceStateUnlinked;
+      DISPATCH_ON_MAIN_QUEUE(
+                             if (!self.shouldLink) {
+                               return;
+                             }
+                             
+                             self.shouldLink = NO;
+                             [self.delegate device:self unlinked:SFError];
+                             );
+      break;
+      
+    case SFBLEDeviceStateUnlinking:
+      self.state = SFBLEDeviceStateUnlinked;
+      DISPATCH_ON_MAIN_QUEUE(
+                             // -unlink has been called, and before the disconnect has been confirmed by the
+                             // central manager -link was called.
+                             if (self.shouldLink) {
+                               DISPATCH_ON_BLE_QUEUE(
+                                                     // If the link call that switched shouldLink to YES, happended after
+                                                     // unlinking was set to NO. Then the linking already started!
+                                                     if (self.state == SFBLEDeviceStateLinking) {
+                                                       return;
+                                                     }
+                                                     else {
+                                                       self.state = SFBLEDeviceStateLinking;
+                                                       [self connect];
+                                                     }
+                                                     );
+                             }
+                             );
+      break;
+      
+    case SFBLEDeviceStateUnlinked:
+      break;
   }
 }
 
@@ -392,7 +386,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 - (void)readValueForCharacteristic:(CBUUID*)characteristicUUID
 {
   DISPATCH_ON_BLE_QUEUE(
-                        if (!self.linked)
+                        if (self.state != SFBLEDeviceStateLinked)
                         return;
                         
                         [self.peripheralDelegate readValueForCharacteristic:characteristicUUID];
@@ -403,7 +397,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 - (void)writeValue:(NSData*)value forCharacteristic:(CBUUID*)characteristicUUID
 {
   DISPATCH_ON_BLE_QUEUE(
-                        if (!self.linked)
+                        if (self.state != SFBLEDeviceStateLinked)
                         return;
                         
                         [self.peripheralDelegate writeValue:value forCharacteristic:characteristicUUID];
@@ -414,7 +408,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 - (void)subscribeToCharacteristic:(CBUUID*)characteristicUUID
 {
   DISPATCH_ON_BLE_QUEUE(
-                        if (!self.linked)
+                        if (self.state != SFBLEDeviceStateLinked)
                         return;
                         
                         [self.peripheralDelegate subscribeToCharacteristic:characteristicUUID];
@@ -425,7 +419,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 - (void)unsubscribeFromCharacteristic:(CBUUID*)characteristicUUID
 {
   DISPATCH_ON_BLE_QUEUE(
-                        if (!self.linked)
+                        if (self.state != SFBLEDeviceStateLinked)
                         return;
                         
                         [self.peripheralDelegate unsubscribeFromCharacteristic:characteristicUUID];
@@ -435,7 +429,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 
 - (void)didUpdateValueForCharacteristic:(CBCharacteristic*)characteristic error:(NSError*)error
 {
-  if (!self.linked)
+  if (self.state != SFBLEDeviceStateLinked)
     return;
   
   NSData* incomingData = characteristic.value;
@@ -525,7 +519,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 {
   [self invalidateBatteryTimer];
   
-  if (self.linked) {
+  if (self.state == SFBLEDeviceStateLinked) {
     DDLogDebug(@"BLE-Device: scheduling battery level read");
     [self readValueForCharacteristic:[CBUUID UUIDWithString:kBLECharBatteryLevel]];
     [self scheduleBatteryTimer];
