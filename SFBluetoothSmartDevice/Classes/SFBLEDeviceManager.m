@@ -62,7 +62,7 @@ static dispatch_queue_t __bleQueue;
     case SFBluetoothSmartErrorNoDeviceFound:
       description = @"No device found";
       break;
-    case SFBluetoothSmartErrorSpecificDeviceNotFound:
+    case SFBluetoothSmartErrorDeviceForIdentifierNotFound:
       description = @"Specific device not found";
       break;
     case SFBluetoothSmartErrorProblemsInConnectionProcess:
@@ -220,12 +220,16 @@ static dispatch_queue_t __bleQueue;
   if (self.identifierToScanFor || self.nameToScanFor) {
     DDLogInfo(@"BLE-Manager: scan timed out. Specific device not found");
     NSError* bleError;
-    bleError = [SFBLEDeviceManager error:SFBluetoothSmartErrorSpecificDeviceNotFound];
-    DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate managerStoppedScanWithError:bleError]);
+    SFBluetoothSmartError error = self.identifierToScanFor ? SFBluetoothSmartErrorDeviceForIdentifierNotFound : SFBluetoothSmartErrorDeviceForNameNotFound;
+    bleError = [SFBLEDeviceManager error:error];
+    DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate managerFoundDevices:@[] error:bleError]);
   }
   else {
     DDLogInfo(@"BLE-Manager: scan timed out. Found %d device(s).", self.discoveredDevices.count);
-    DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate managerFoundDevices:self.discoveredDevices.allValues]);
+    if (self.discoveredDevices.count)
+      DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate managerFoundDevices:self.discoveredDevices.allValues error:nil]);
+    else
+      DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate managerFoundDevices:@[] error:[SFBLEDeviceManager error:SFBluetoothSmartErrorNoDeviceFound]]);
   }
 }
 
@@ -246,7 +250,7 @@ static dispatch_queue_t __bleQueue;
     [self executeStoppingScanDuties];
     
     SFBLEDevice* suitableDevice = [SFBLEDevice deviceWithPeripheral:peripheral centralDelegate:self.centralDelegate servicesAndCharacteristics:self.servicesAndCharacteristics];
-    DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate managerFoundDevices:@[suitableDevice]]);
+    DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate managerFoundDevices:@[suitableDevice] error:nil]);
   }
   else if (!self.identifierToScanFor && !self.nameToScanFor) {
     if (![self.discoveredDevices.allKeys containsObject:peripheral.identifier]) {

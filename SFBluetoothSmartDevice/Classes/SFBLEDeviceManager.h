@@ -13,7 +13,8 @@
 typedef NS_ENUM(NSInteger, SFBluetoothSmartError) {
   SFBluetoothSmartErrorNoBluetooth = 1,
   SFBluetoothSmartErrorNoDeviceFound,
-  SFBluetoothSmartErrorSpecificDeviceNotFound,
+  SFBluetoothSmartErrorDeviceForIdentifierNotFound,
+  SFBluetoothSmartErrorDeviceForNameNotFound,
   SFBluetoothSmartErrorProblemsInConnectionProcess,
   SFBluetoothSmartErrorProblemsInDiscoveryProcess,
   SFBluetoothSmartErrorConnectionClosedByDevice,
@@ -49,7 +50,7 @@ typedef NS_ENUM(NSInteger, SFBluetoothSmartError) {
 
 // called at the end of the timeout, with all devices that have been found (may be an
 // empty array)
-- (void)managerFoundDevices:(NSArray*)bleDevices;
+- (void)managerFoundDevices:(NSArray*)bleDevices error:(NSError*)error;
 // called at the end of the timeout if the specific
 // device has not been found or in between if an error surfaced.
 // If Bluetooth goes to off while scanning, you will get managerStoppedScanWithError: with
