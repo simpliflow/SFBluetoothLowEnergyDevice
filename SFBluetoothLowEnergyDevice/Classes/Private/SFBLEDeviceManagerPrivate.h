@@ -11,6 +11,7 @@
 
 
 
+
 @interface SFBLEDeviceManager () {
   __block SMDelayedBlockHandle _scanTimeoutBlock;
 }

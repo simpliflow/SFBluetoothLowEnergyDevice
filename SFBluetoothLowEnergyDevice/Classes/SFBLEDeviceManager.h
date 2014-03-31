@@ -8,6 +8,10 @@
 #import <Foundation/Foundation.h>
 #import "SFBLEDevice.h"
 
+@protocol SFBLEDeviceManagerDelegate;
+
+
+
 
 // Error codes for NSErrors, domain is "SFBluetoothSmartDevice"
 typedef NS_ENUM(NSInteger, SFBluetoothSmartError) {
@@ -22,7 +26,8 @@ typedef NS_ENUM(NSInteger, SFBluetoothSmartError) {
   SFBluetoothSmartErrorUnknown
 };
 
-@protocol SFBLEDeviceManagerDelegate;
+extern NSString* const kSFBluetoothLowEnergyErrorDomain;
+
 
 
 

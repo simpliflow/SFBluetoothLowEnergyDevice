@@ -29,6 +29,8 @@ dispatch_async(SFBLEDeviceManager.bleQueue, ^{ \
 statement; \
 }); } while(0)
 
+NSString* const kSFBluetoothLowEnergyErrorDomain = @"SFBluetoothLowEnergyError";
+
 
 
 
@@ -85,7 +87,7 @@ static dispatch_queue_t __bleQueue;
       break;
   }
   
-  return [NSError errorWithDomain:@"SFBluetoothSmartError"
+  return [NSError errorWithDomain:kSFBluetoothLowEnergyErrorDomain
                              code:errorCode
                          userInfo:@{
                                     NSLocalizedDescriptionKey:description
