@@ -1,5 +1,5 @@
-# SFBluetoothSmartDevice, Alpha
 **Note: the information in this Readme is predated until release 0.7.0**
+# SFBluetoothLowEnergyDevice, Beta
 An opinionated wrapper for CoreBluetooth to ease the communication with simple Bluetooth Low Energy (Bluetooth smart, Bluetooth 4.0, BLE) devices.
 
 It assumes that you know the service and characteristic UUIDs of the device you want to communicate with and which of these services are advertised. All BLE actions (scanning, connecting, discovering, writing, reading) are handled on a separate queue, all delegate callbacks are returned on the main queue.
