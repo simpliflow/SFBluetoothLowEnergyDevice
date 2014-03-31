@@ -112,7 +112,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
                           case SFBLEDeviceStateUnlinking:
                           case SFBLEDeviceStateLinked:
                           case SFBLEDeviceStateLinking:
-                            DDLogDebug(@"BLE-Device: state on \"link\" is %d", self.state);
+                            DDLogDebug(@"BLE-Device: state on \"linking\" is %d", self.state);
                             break;
                         }
                         );
