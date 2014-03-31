@@ -1,4 +1,3 @@
-**Note: the information in this Readme is predated until release 0.7.0**
 # SFBluetoothLowEnergyDevice, Beta
 An opinionated wrapper for CoreBluetooth to ease the communication with simple Bluetooth Low Energy (Bluetooth smart, Bluetooth 4.0, BLE) devices.
 
