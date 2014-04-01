@@ -17,7 +17,7 @@
 
 @interface SFBLECentralManagerDelegate : NSObject <CBCentralManagerDelegate>
 
-// SFBLEDeviceManager
+// SFBLEDeviceFinder
 + (instancetype)centralDelegateForDeviceManager:(SFBLEDeviceFinder*)deviceManager withBLEQueue:(dispatch_queue_t)bleQueue;
 
 - (void)scanForPeripheralsAdvertising:(NSArray*)advertisedServices;

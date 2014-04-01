@@ -1,5 +1,5 @@
 //
-//  SFBLEDeviceManager.h
+//  SFBLEDeviceFinder.h
 //  SFBluetoothLowEnergyDevice
 //
 //  Created by Thomas Billicsich on 2014-01-13.
@@ -8,7 +8,7 @@
 #import <Foundation/Foundation.h>
 #import "SFBLEDevice.h"
 
-@protocol SFBLEDeviceManagerDelegate;
+@protocol SFBLEDeviceFinderDelegate;
 
 
 
@@ -36,31 +36,33 @@ extern NSString* const kSFBluetoothLowEnergyErrorDomain;
 
 + (NSError*)error:(SFBluetoothSmartError)errorCode;
 
-@property (nonatomic, assign) NSObject<SFBLEDeviceManagerDelegate>* delegate;
+@property (nonatomic, assign) NSObject<SFBLEDeviceFinderDelegate>* delegate;
 
-+ (instancetype)managerForDevicesWithServicesAndCharacteristics:(NSDictionary*)servicesAndCharacteristics advertising:(NSArray*)advertisedServices;
++ (instancetype)finderForDevicesWithServicesAndCharacteristics:(NSDictionary*)servicesAndCharacteristics advertising:(NSArray*)advertisedServices;
 
-/// Followed by managerFoundDevices: or managerAbortedScanWithError
-- (void)scanFor:(NSUUID*)identifier timeout:(NSTimeInterval)timeout;
-- (void)scanForName:(NSString*)name timeout:(NSTimeInterval)timeout;
-- (void)stopScan;
+// All three of the following methods trigger either a finderFoundDevices:error: or a
+// finderStoppedFindWithError: call.
+// findDevices: is a convenience method to a nil identifier or name.
+- (void)findDevices:(NSTimeInterval)timeout;
+- (void)findDeviceWithIdentifier:(NSUUID*)identifier timeout:(NSTimeInterval)timeout;
+- (void)findDeviceWithName:(NSString*)name timeout:(NSTimeInterval)timeout;
 
+- (void)stopFind;
 
 @end
 
 
 
 
-@protocol SFBLEDeviceManagerDelegate
+@protocol SFBLEDeviceFinderDelegate
 
-// called at the end of the timeout, with all devices that have been found (may be an
-// empty array)
-- (void)managerFoundDevices:(NSArray*)bleDevices error:(NSError*)error;
-// called at the end of the timeout if the specific
-// device has not been found or in between if an error surfaced.
-// If Bluetooth goes to off while scanning, you will get managerStoppedScanWithError: with
-// a no bluetooth error and bluetoothNotAvailable will also be called.
-- (void)managerStoppedScanWithError:(NSError*)error;
+// Called at the end of the timeout, with all devices that have been found (may be an
+// empty array) or an error.
+- (void)finderFoundDevices:(NSArray*)bleDevices error:(NSError*)error;
+
+// Called if no Bluetooth is available, if Bluetooth becomes unavailable during the scan
+// this method will be called and bluetoothNotAvailable too.
+- (void)finderStoppedFindWithError:(NSError*)error;
 
 // Called every time the Bluetooth state goes from On to Off, Unavailable, etc.
 - (void)bluetoothNotAvailable;
@@ -74,5 +76,4 @@ extern NSString* const kSFBluetoothLowEnergyErrorDomain;
 /*
 Things to test:
  * what happens to connecting/connected devices when Bluetooth is switched off? The Pod explicitly cancels the connections. Is this necessary (or would they not resume connection on Bluetooth-back-on anyway)? Do they get a response for the cancel call? (Remove the note in SFBLECentralManagerDelegate if this question has been answered)
- * check
 */

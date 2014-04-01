@@ -12,7 +12,7 @@
 static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 #import "SFBLEDeviceFinder.h"
-#import "SFBLEDeviceManagerPrivate.h"
+#import "SFBLEDeviceFinderPrivate.h"
 #import "SFBLEDevice.h"
 #import "SFBLEDevicePrivate.h"
 
@@ -87,7 +87,7 @@ static NSArray* __managerStateStrings;
 
 
 #pragma mark -
-#pragma mark SFBLEDeviceManager
+#pragma mark SFBLEDeviceFinder
 
 
 - (void)scanForPeripheralsAdvertising:(NSArray*)advertisedServices
@@ -185,7 +185,7 @@ static NSArray* __managerStateStrings;
 
 
 
-#pragma mark For SFBLEDeviceManager
+#pragma mark For SFBLEDeviceFinder
 
 
 - (void)centralManager:(CBCentralManager*)central didDiscoverPeripheral:(CBPeripheral*)peripheral advertisementData:(NSDictionary*)advertisementData RSSI:(NSNumber*)RSSI

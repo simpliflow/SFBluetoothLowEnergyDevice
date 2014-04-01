@@ -13,7 +13,7 @@
 static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 #import "SFBLEDeviceFinder.h"
-#import "SFBLEDeviceManagerPrivate.h"
+#import "SFBLEDeviceFinderPrivate.h"
 #import "SFBLECentralManagerDelegate.h"
 #import "SFBLEPeripheralDelegate.h"
 
@@ -26,7 +26,7 @@ dispatch_async(dispatch_get_main_queue(), ^{ \
 statement; \
 }); } while(0)
 #define DISPATCH_ON_BLE_QUEUE(statement) do { \
-dispatch_async(SFBLEDeviceManager.bleQueue, ^{ \
+dispatch_async(SFBLEDeviceFinder.bleQueue, ^{ \
 statement; \
 }); } while(0)
 

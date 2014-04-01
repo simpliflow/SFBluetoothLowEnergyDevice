@@ -1,12 +1,12 @@
 //
-//  SFBLEDeviceManager.m
+//  SFBLEDeviceFinder.m
 //  SFBluetoothLowEnergyDevice
 //
 //  Created by Thomas Billicsich on 2014-01-13.
 //  Copyright (c) 2014 Thomas Billicsich. All rights reserved.
 
 #import "SFBLEDeviceFinder.h"
-#import "SFBLEDeviceManagerPrivate.h"
+#import "SFBLEDeviceFinderPrivate.h"
 
 #import "DDLog.h"
 #import "DDTTYLogger.h"
@@ -25,7 +25,7 @@ dispatch_async(dispatch_get_main_queue(), ^{ \
 statement; \
 }); } while(0)
 #define DISPATCH_ON_BLE_QUEUE(statement) do { \
-dispatch_async(SFBLEDeviceManager.bleQueue, ^{ \
+dispatch_async(SFBLEDeviceFinder.bleQueue, ^{ \
 statement; \
 }); } while(0)
 
@@ -95,7 +95,7 @@ static dispatch_queue_t __bleQueue;
 }
 
 
-+ (instancetype)managerForDevicesWithServicesAndCharacteristics:(NSDictionary*)servicesAndCharacteristics advertising:(NSArray*)advertisedServices
++ (instancetype)finderForDevicesWithServicesAndCharacteristics:(NSDictionary*)servicesAndCharacteristics advertising:(NSArray*)advertisedServices
 {
   return [[SFBLEDeviceFinder alloc] initWithServicesAndCharacteristics:servicesAndCharacteristics advertising:advertisedServices];
 }
@@ -135,7 +135,7 @@ static dispatch_queue_t __bleQueue;
     self.advertisedServices = advertisedServices;
     self.servicesAndCharacteristics = servicesAndCharacteristics;
     
-    _centralDelegate = [SFBLECentralManagerDelegate centralDelegateForDeviceManager:self withBLEQueue:SFBLEDeviceManager.bleQueue];
+    _centralDelegate = [SFBLECentralManagerDelegate centralDelegateForDeviceManager:self withBLEQueue:SFBLEDeviceFinder.bleQueue];
   }
   return self;
 }
@@ -147,13 +147,19 @@ static dispatch_queue_t __bleQueue;
 #pragma mark Scanning
 
 
-- (void)scanFor:(NSUUID*)identifier timeout:(NSTimeInterval)timeout
+- (void)findDevices:(NSTimeInterval)timeout
+{
+  [self findDeviceWithIdentifier:nil timeout:timeout];
+}
+
+
+- (void)findDeviceWithIdentifier:(NSUUID*)identifier timeout:(NSTimeInterval)timeout
 {
   if (self.shouldScan)
     return;
   
   if (self.bluetoothIsNotAvailable) {
-    DISPATCH_ON_MAIN_QUEUE([self.delegate managerStoppedScanWithError:[SFBLEDeviceFinder error:SFBluetoothSmartErrorNoBluetooth]]);
+    DISPATCH_ON_MAIN_QUEUE([self.delegate finderStoppedFindWithError:[SFBLEDeviceFinder error:SFBluetoothSmartErrorNoBluetooth]]);
     return;
   }
   
@@ -171,13 +177,13 @@ static dispatch_queue_t __bleQueue;
 }
 
 
-- (void)scanForName:(NSString*)name timeout:(NSTimeInterval)timeout
+- (void)findDeviceWithName:(NSString*)name timeout:(NSTimeInterval)timeout
 {
   if (self.shouldScan)
     return;
   
   if (self.bluetoothIsNotAvailable) {
-    DISPATCH_ON_MAIN_QUEUE([self.delegate managerStoppedScanWithError:[SFBLEDeviceFinder error:SFBluetoothSmartErrorNoBluetooth]]);
+    DISPATCH_ON_MAIN_QUEUE([self.delegate finderStoppedFindWithError:[SFBLEDeviceFinder error:SFBluetoothSmartErrorNoBluetooth]]);
     return;
   }
   
@@ -198,7 +204,7 @@ static dispatch_queue_t __bleQueue;
 
 - (void)startScanTimer
 {
-  _scanTimeoutBlock = perform_block_after_delay(self.scanTimeout, SFBLEDeviceManager.bleQueue, ^{
+  _scanTimeoutBlock = perform_block_after_delay(self.scanTimeout, SFBLEDeviceFinder.bleQueue, ^{
     [self scanTimedOut];
   });
 }
@@ -224,14 +230,14 @@ static dispatch_queue_t __bleQueue;
     NSError* bleError;
     SFBluetoothSmartError error = self.identifierToScanFor ? SFBluetoothSmartErrorDeviceForIdentifierNotFound : SFBluetoothSmartErrorDeviceForNameNotFound;
     bleError = [SFBLEDeviceFinder error:error];
-    DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate managerFoundDevices:@[] error:bleError]);
+    DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate finderFoundDevices:@[] error:bleError]);
   }
   else {
     DDLogInfo(@"BLE-Manager: scan timed out. Found %d device(s).", self.discoveredDevices.count);
     if (self.discoveredDevices.count)
-      DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate managerFoundDevices:self.discoveredDevices.allValues error:nil]);
+      DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate finderFoundDevices:self.discoveredDevices.allValues error:nil]);
     else
-      DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate managerFoundDevices:@[] error:[SFBLEDeviceFinder error:SFBluetoothSmartErrorNoDeviceFound]]);
+      DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate finderFoundDevices:@[] error:[SFBLEDeviceFinder error:SFBluetoothSmartErrorNoDeviceFound]]);
   }
 }
 
@@ -252,7 +258,7 @@ static dispatch_queue_t __bleQueue;
     [self executeStoppingScanDuties];
     
     SFBLEDevice* suitableDevice = [SFBLEDevice deviceWithPeripheral:peripheral centralDelegate:self.centralDelegate servicesAndCharacteristics:self.servicesAndCharacteristics];
-    DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate managerFoundDevices:@[suitableDevice] error:nil]);
+    DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate finderFoundDevices:@[suitableDevice] error:nil]);
   }
   else if (!self.identifierToScanFor && !self.nameToScanFor) {
     if (![self.discoveredDevices.allKeys containsObject:peripheral.identifier]) {
@@ -269,7 +275,7 @@ static dispatch_queue_t __bleQueue;
 }
 
 
-- (void)stopScan
+- (void)stopFind
 {
   self.shouldScan = NO;
   DISPATCH_ON_BLE_QUEUE([self executeStoppingScanDuties]);
@@ -294,7 +300,7 @@ static dispatch_queue_t __bleQueue;
     [self executeStoppingScanDuties];
     DISPATCH_ON_MAIN_QUEUE(
                            self.shouldScan = NO;
-                           [self.delegate managerStoppedScanWithError:[SFBLEDeviceFinder error:SFBluetoothSmartErrorNoBluetooth]];
+                           [self.delegate finderStoppedFindWithError:[SFBLEDeviceFinder error:SFBluetoothSmartErrorNoBluetooth]];
     );
   }
   

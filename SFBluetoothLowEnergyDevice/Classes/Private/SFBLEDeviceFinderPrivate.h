@@ -1,5 +1,5 @@
 //
-//  SFBLEDeviceManagerPrivate.h
+//  SFBLEDeviceFinderPrivate.h
 //  SFBluetoothLowEnergyDevice
 //
 //  Created by Thomas Billicsich on 2014-03-05.

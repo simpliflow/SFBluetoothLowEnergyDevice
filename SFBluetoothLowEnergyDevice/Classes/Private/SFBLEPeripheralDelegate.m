@@ -13,7 +13,7 @@
 static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 #import "SFBLEDeviceFinder.h"
-#import "SFBLEDeviceManagerPrivate.h"
+#import "SFBLEDeviceFinderPrivate.h"
 #import "SFBLEDevice.h"
 #import "SFBLEDevicePrivate.h"
 
@@ -50,7 +50,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 - (id)initWithServicesAndCharacteristics:(NSDictionary*)servicesAndCharacteristics forDevice:(SFBLEDevice*)device
 {
   if (self = [super init]) {
-    // No need to check here, as it has already been checked on SFBLEDeviceManager-init
+    // No need to check here, as it has already been checked on SFBLEDeviceFinder-init
     _servicesAndCharacteristics = servicesAndCharacteristics;
     _device = device;
     device.peripheral.delegate = self;
@@ -88,7 +88,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 - (void)startDiscoveryTimer
 {
-  _discoveryTimeoutBlock = perform_block_after_delay(DISCOVERY_TIMEOUT, SFBLEDeviceManager.bleQueue, ^{
+  _discoveryTimeoutBlock = perform_block_after_delay(DISCOVERY_TIMEOUT, [SFBLEDeviceFinder bleQueue], ^{
     [self discoveryTimedOut];
   });
 }

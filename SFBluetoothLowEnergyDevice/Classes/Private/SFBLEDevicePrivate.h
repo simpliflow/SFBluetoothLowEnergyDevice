@@ -47,7 +47,7 @@ typedef NS_ENUM(NSInteger, SFBLEDeviceState) {
 // ====================================
 
 
-// SFBLEDeviceManager
+// SFBLEDeviceFinder
 + (instancetype)deviceWithPeripheral:(CBPeripheral*)peripheral centralDelegate:(SFBLECentralManagerDelegate*)centralDelegate servicesAndCharacteristics:(NSDictionary*)servicesAndCharacteristics;
 
 // SFBLECentralManagerDelegate
