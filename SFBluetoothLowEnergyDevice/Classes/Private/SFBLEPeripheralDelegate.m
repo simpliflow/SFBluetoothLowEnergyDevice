@@ -12,7 +12,7 @@
 #import "DDLog.h"
 static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
-#import "SFBLEDeviceManager.h"
+#import "SFBLEDeviceFinder.h"
 #import "SFBLEDeviceManagerPrivate.h"
 #import "SFBLEDevice.h"
 #import "SFBLEDevicePrivate.h"

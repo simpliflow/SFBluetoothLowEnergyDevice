@@ -32,7 +32,7 @@ extern NSString* const kSFBluetoothLowEnergyErrorDomain;
 
 
 
-@interface SFBLEDeviceManager : NSObject
+@interface SFBLEDeviceFinder : NSObject
 
 + (NSError*)error:(SFBluetoothSmartError)errorCode;
 

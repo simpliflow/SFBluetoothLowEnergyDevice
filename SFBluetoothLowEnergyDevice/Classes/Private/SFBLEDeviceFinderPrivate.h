@@ -12,7 +12,7 @@
 
 
 
-@interface SFBLEDeviceManager () {
+@interface SFBLEDeviceFinder () {
   __block SMDelayedBlockHandle _scanTimeoutBlock;
 }
 

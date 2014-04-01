@@ -11,7 +11,7 @@
 #import "DDLog.h"
 static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
-#import "SFBLEDeviceManager.h"
+#import "SFBLEDeviceFinder.h"
 #import "SFBLEDeviceManagerPrivate.h"
 #import "SFBLEDevice.h"
 #import "SFBLEDevicePrivate.h"
@@ -21,7 +21,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 @interface SFBLECentralManagerDelegate ()
 
-@property (nonatomic, assign) SFBLEDeviceManager* deviceManager;
+@property (nonatomic, assign) SFBLEDeviceFinder* deviceManager;
 
 @property (nonatomic) CBCentralManager* bleCentral;
 
@@ -69,11 +69,11 @@ static NSArray* __managerStateStrings;
 }
 
 
-+ (instancetype)centralDelegateForDeviceManager:(SFBLEDeviceManager*)deviceManager withBLEQueue:(dispatch_queue_t)bleQueue
++ (instancetype)centralDelegateForDeviceManager:(SFBLEDeviceFinder*)deviceManager withBLEQueue:(dispatch_queue_t)bleQueue
 {
-  return [[SFBLECentralManagerDelegate alloc] initForDeviceManager:(SFBLEDeviceManager*)deviceManager withBLEQueue:(dispatch_queue_t)bleQueue];
+  return [[SFBLECentralManagerDelegate alloc] initForDeviceManager:(SFBLEDeviceFinder*)deviceManager withBLEQueue:(dispatch_queue_t)bleQueue];
 }
-- (id)initForDeviceManager:(SFBLEDeviceManager*)deviceManager withBLEQueue:(dispatch_queue_t)bleQueue
+- (id)initForDeviceManager:(SFBLEDeviceFinder*)deviceManager withBLEQueue:(dispatch_queue_t)bleQueue
 {
   if (self = [super init]) {
     _deviceManager = deviceManager;

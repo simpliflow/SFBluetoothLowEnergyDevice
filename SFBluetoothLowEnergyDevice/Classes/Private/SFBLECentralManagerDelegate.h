@@ -10,7 +10,7 @@
 #import <CoreBluetooth/CoreBluetooth.h>
 
 
-@class SFBLEDeviceManager, SFBLEDevice;
+@class SFBLEDeviceFinder, SFBLEDevice;
 
 
 
@@ -18,7 +18,7 @@
 @interface SFBLECentralManagerDelegate : NSObject <CBCentralManagerDelegate>
 
 // SFBLEDeviceManager
-+ (instancetype)centralDelegateForDeviceManager:(SFBLEDeviceManager*)deviceManager withBLEQueue:(dispatch_queue_t)bleQueue;
++ (instancetype)centralDelegateForDeviceManager:(SFBLEDeviceFinder*)deviceManager withBLEQueue:(dispatch_queue_t)bleQueue;
 
 - (void)scanForPeripheralsAdvertising:(NSArray*)advertisedServices;
 - (void)stopScan;

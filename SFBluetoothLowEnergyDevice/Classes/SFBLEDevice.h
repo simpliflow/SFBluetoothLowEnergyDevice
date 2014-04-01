@@ -9,7 +9,7 @@
 #import <CoreBluetooth/CoreBluetooth.h>
 
 @protocol SFBLEDeviceDelegate;
-@class SFBLEDeviceManager;
+@class SFBLEDeviceFinder;
 
 
 
