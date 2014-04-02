@@ -230,7 +230,7 @@ static dispatch_queue_t __bleQueue;
     NSError* bleError;
     SFBluetoothSmartError error = self.identifierToScanFor ? SFBluetoothSmartErrorDeviceForIdentifierNotFound : SFBluetoothSmartErrorDeviceForNameNotFound;
     bleError = [SFBLEDeviceFinder error:error];
-    DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate finderFoundDevices:@[] error:bleError]);
+    DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate finderFoundDevices:self.discoveredDevices.allValues error:bleError]);
   }
   else {
     DDLogInfo(@"BLE-Manager: scan timed out. Found %d device(s).", self.discoveredDevices.count);
@@ -252,25 +252,19 @@ static dispatch_queue_t __bleQueue;
   if (RSSI.integerValue == 127)
     return;
   
+  if (![self.discoveredDevices.allKeys containsObject:peripheral.identifier]) {
+    DDLogInfo(@"BLE-Manager: new suitable peripheral %p (%@, %@). RSSI: %@", peripheral, peripheral.identifier, peripheral.name, RSSI);
+    self.discoveredDevices[peripheral.identifier] = [SFBLEDevice deviceWithPeripheral:peripheral centralDelegate:self.centralDelegate servicesAndCharacteristics:self.servicesAndCharacteristics];
+  }
+
   if ( (self.identifierToScanFor && [self.identifierToScanFor isEqual:peripheral.identifier]) ||
-      (self.nameToScanFor && [self.nameToScanFor isEqualToString:peripheral.name]) ) {
-    DDLogDebug(@"BLE-Manager: did discover suitable peripheral: %@", peripheral);
+      (self.nameToScanFor && [self.nameToScanFor isEqualToString:peripheral.name]) )
+  {
+    DDLogDebug(@"BLE-Manager: did discover specific peripheral: %@", peripheral);
     [self executeStoppingScanDuties];
     
     SFBLEDevice* suitableDevice = [SFBLEDevice deviceWithPeripheral:peripheral centralDelegate:self.centralDelegate servicesAndCharacteristics:self.servicesAndCharacteristics];
     DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate finderFoundDevices:@[suitableDevice] error:nil]);
-  }
-  else if (!self.identifierToScanFor && !self.nameToScanFor) {
-    if (![self.discoveredDevices.allKeys containsObject:peripheral.identifier]) {
-      DDLogInfo(@"BLE-Manager: new suitable peripheral %p (%@, %@). RSSI: %@", peripheral, peripheral.identifier, peripheral.name, RSSI);
-      self.discoveredDevices[peripheral.identifier] = [SFBLEDevice deviceWithPeripheral:peripheral centralDelegate:self.centralDelegate servicesAndCharacteristics:self.servicesAndCharacteristics];
-    }
-    else {
-//      DDLogDebug(@"BLE-Manager: rediscovered suitable peripheral %p. RSSI: %@", peripheral, RSSI);
-    }
-  }
-  else {
-    DDLogDebug(@"BLE-Manager: did discover unsuitable peripheral: %@", peripheral);
   }
 }
 
