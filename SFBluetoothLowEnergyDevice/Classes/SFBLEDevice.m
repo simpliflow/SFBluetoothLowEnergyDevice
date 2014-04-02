@@ -18,7 +18,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 #import "SFBLEPeripheralDelegate.h"
 
 
-#define CONNECT_TIMEOUT 1.5
+#define CONNECT_TIMEOUT 3
 #define BATTERY_READ_INTERVAL 30
 
 #define DISPATCH_ON_MAIN_QUEUE(statement) do { \
