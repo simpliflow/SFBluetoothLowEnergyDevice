@@ -225,19 +225,25 @@ static dispatch_queue_t __bleQueue;
 
   [self executeStoppingScanDuties];
   
-  if (self.identifierToScanFor || self.nameToScanFor) {
+  if (self.identifierToScanFor || self.nameToScanFor)
+  {
     DDLogInfo(@"BLE-Manager: scan timed out. Specific device not found");
-    NSError* bleError;
-    SFBluetoothSmartError error = self.identifierToScanFor ? SFBluetoothSmartErrorDeviceForIdentifierNotFound : SFBluetoothSmartErrorDeviceForNameNotFound;
-    bleError = [SFBLEDeviceFinder error:error];
-    DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate finderFoundDevices:self.discoveredDevices.allValues error:bleError]);
+    
+    NSError* SFBLEError;
+    SFBluetoothSmartError errorCode = self.identifierToScanFor ? SFBluetoothSmartErrorDeviceForIdentifierNotFound : SFBluetoothSmartErrorDeviceForNameNotFound;
+    SFBLEError = [SFBLEDeviceFinder error:errorCode];
+    
+    DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate finderFoundDevices:self.discoveredDevices.allValues error:SFBLEError]);
   }
-  else {
+  else
+  {
     DDLogInfo(@"BLE-Manager: scan timed out. Found %d device(s).", self.discoveredDevices.count);
+    
+    NSError* SFBLEError;
     if (self.discoveredDevices.count)
-      DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate finderFoundDevices:self.discoveredDevices.allValues error:nil]);
-    else
-      DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate finderFoundDevices:@[] error:[SFBLEDeviceFinder error:SFBluetoothSmartErrorNoDeviceFound]]);
+      SFBLEError = [SFBLEDeviceFinder error:SFBluetoothSmartErrorNoDeviceFound];
+    
+    DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate finderFoundDevices:self.discoveredDevices.allValues error:SFBLEError]);
   }
 }
 
