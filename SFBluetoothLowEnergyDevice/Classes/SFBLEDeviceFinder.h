@@ -44,9 +44,23 @@ extern NSString* const kSFBluetoothLowEnergyErrorDomain;
 // finderStoppedFindWithError: call.
 // findDevices: is a convenience method to a nil identifier or name.
 - (void)findDevices:(NSTimeInterval)timeout;
+// These two search for a specific device
+// * if the device is found within the timeout, bleDevices of finderFoundDevices:error:
+//    contains only the specific device and no error
+// * if the device is not found within the timeout, bleDevices of finderFoundDevices:error:
+//    contains all devices that have been found (advertising the services as defined
+//    by the init method of this class of course), and an error (code is either
+//    SFBluetoothSmartErrorDeviceForIdentifierNotFound or SFBluetoothSmartErrorDeviceForNameNotFound).
+// * if nil has been provided for name or identifier and if one or more devices have
+//    been found they are contained in bleDevices of finderFoundDevices:error: and the
+//    error is nil
+// * if nil has been provided for name or identifier and no devices have been found
+//    bleDevices of finderFoundDevices:error: is an empty array and the error's code
+//    is SFBluetoothSmartErrorNoDeviceFound.
 - (void)findDeviceWithIdentifier:(NSUUID*)identifier timeout:(NSTimeInterval)timeout;
 - (void)findDeviceWithName:(NSString*)name timeout:(NSTimeInterval)timeout;
 
+// Stops a find, does nothing if no find is in progress.
 - (void)stopFind;
 
 @end
@@ -56,18 +70,19 @@ extern NSString* const kSFBluetoothLowEnergyErrorDomain;
 
 @protocol SFBLEDeviceFinderDelegate
 
-// Called at the end of the timeout, with all devices that have been found (may be an
-// empty array) or an error.
+// Called at the end of the timeout or if the specific device has been found. See
+// above for details.
 - (void)finderFoundDevices:(NSArray*)bleDevices error:(NSError*)error;
 
-// Called if no Bluetooth is available, if Bluetooth becomes unavailable during the scan
-// this method will be called and bluetoothNotAvailable too.
+// Called if Bluetooth is or becomes unavailable. If Bluetooth becomes unavailable
+// during the scan this method will be called and bluetoothNotAvailable too.
 - (void)finderStoppedFindWithError:(NSError*)error;
 
 // Called every time the Bluetooth state goes from On to Off, Unavailable, etc.
 - (void)bluetoothNotAvailable;
-// Called every time the Bluetooth state goes from Off, Unavailable, Unsupported, etc to On. Will not
-// be called at application start.
+
+// Called every time the Bluetooth state goes from Off, Unavailable, Unsupported,
+// etc to On. Will not be called at application start.
 - (void)bluetoothAvailableAgain;
 
 @end
