@@ -240,7 +240,7 @@ static dispatch_queue_t __bleQueue;
     DDLogInfo(@"BLE-Manager: scan timed out. Found %d device(s).", self.discoveredDevices.count);
     
     NSError* SFBLEError;
-    if (self.discoveredDevices.count)
+    if (!self.discoveredDevices.count)
       SFBLEError = [SFBLEDeviceFinder error:SFBluetoothSmartErrorNoDeviceFound];
     
     DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate finderFoundDevices:self.discoveredDevices.allValues error:SFBLEError]);
