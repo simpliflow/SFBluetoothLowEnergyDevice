@@ -65,6 +65,7 @@ static dispatch_queue_t __bleQueue;
       description = @"No device found";
       break;
     case SFBluetoothSmartErrorDeviceForIdentifierNotFound:
+    case SFBluetoothSmartErrorDeviceForNameNotFound:
       description = @"Specific device not found";
       break;
     case SFBluetoothSmartErrorProblemsInConnectionProcess:
@@ -81,9 +82,6 @@ static dispatch_queue_t __bleQueue;
       break;
     case SFBluetoothSmartErrorUnknown:
       description = @"Unknown error";
-      break;
-      
-    default:
       break;
   }
   
