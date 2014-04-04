@@ -8,10 +8,9 @@
 #import "SFBLEDeviceFinder.h"
 #import "SFBLEDeviceFinderPrivate.h"
 
-#import "DDLog.h"
+#import "SFBLELogging.h"
 #import "DDTTYLogger.h"
 #import "SFConsoleLogFormat.h"
-static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 #import "SFBLEDevice.h"
 #import "SFBLEDevicePrivate.h"

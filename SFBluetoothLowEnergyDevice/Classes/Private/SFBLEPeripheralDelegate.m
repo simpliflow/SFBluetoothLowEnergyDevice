@@ -8,10 +8,7 @@
 
 #import "SFBLEPeripheralDelegate.h"
 #import "SpacemanBlocks.h"
-
-#import "DDLog.h"
-static const int ddLogLevel = LOG_LEVEL_DEBUG;
-
+#import "SFBLELogging.h"
 #import "SFBLEDeviceFinder.h"
 #import "SFBLEDeviceFinderPrivate.h"
 #import "SFBLEDevice.h"
