@@ -227,7 +227,7 @@ static dispatch_queue_t __bleQueue;
   
   if (self.identifierToScanFor || self.nameToScanFor)
   {
-    DDLogInfo(@"BLE-Manager: scan timed out. Specific device not found");
+    DDLogInfo(@"BLE-Finder: scan timed out. Specific device not found");
     
     NSError* SFBLEError;
     SFBluetoothSmartError errorCode = self.identifierToScanFor ? SFBluetoothSmartErrorDeviceForIdentifierNotFound : SFBluetoothSmartErrorDeviceForNameNotFound;
@@ -237,7 +237,7 @@ static dispatch_queue_t __bleQueue;
   }
   else
   {
-    DDLogInfo(@"BLE-Manager: scan timed out. Found %d device(s).", self.discoveredDevices.count);
+    DDLogInfo(@"BLE-Finder: scan timed out. Found %d device(s).", self.discoveredDevices.count);
     
     NSError* SFBLEError;
     if (!self.discoveredDevices.count)
@@ -259,14 +259,14 @@ static dispatch_queue_t __bleQueue;
     return;
   
   if (![self.discoveredDevices.allKeys containsObject:peripheral.identifier]) {
-    DDLogInfo(@"BLE-Manager: new suitable peripheral %p (%@, %@). RSSI: %@", peripheral, peripheral.identifier, peripheral.name, RSSI);
+    DDLogInfo(@"BLE-Finder: new suitable peripheral %p (%@, %@). RSSI: %@", peripheral, peripheral.identifier, peripheral.name, RSSI);
     self.discoveredDevices[peripheral.identifier] = [SFBLEDevice deviceWithPeripheral:peripheral centralDelegate:self.centralDelegate servicesAndCharacteristics:self.servicesAndCharacteristics];
   }
 
   if ( (self.identifierToScanFor && [self.identifierToScanFor isEqual:peripheral.identifier]) ||
       (self.nameToScanFor && [self.nameToScanFor isEqualToString:peripheral.name]) )
   {
-    DDLogDebug(@"BLE-Manager: did discover specific peripheral: %@", peripheral);
+    DDLogDebug(@"BLE-Finder: did discover specific peripheral: %@", peripheral);
     [self executeStoppingScanDuties];
     
     SFBLEDevice* suitableDevice = [SFBLEDevice deviceWithPeripheral:peripheral centralDelegate:self.centralDelegate servicesAndCharacteristics:self.servicesAndCharacteristics];
@@ -330,11 +330,11 @@ static dispatch_queue_t __bleQueue;
   NSString* servicesString = [[self.advertisedServices valueForKeyPath:@"@unionOfObjects.description"] componentsJoinedByString:@", "];
   
   if (self.identifierToScanFor)
-    DDLogDebug(@"BLE-Manager: will scan for dvc with name \"%@\" advertising: %@", self.identifierToScanFor, servicesString);
+    DDLogDebug(@"BLE-Finder: will scan for dvc with name \"%@\" advertising: %@", self.identifierToScanFor, servicesString);
   else if (self.nameToScanFor)
-    DDLogDebug(@"BLE-Manager: will scan for dvc with id \"%@\" advertising: %@", self.nameToScanFor, servicesString);
+    DDLogDebug(@"BLE-Finder: will scan for dvc with id \"%@\" advertising: %@", self.nameToScanFor, servicesString);
   else
-    DDLogDebug(@"BLE-Manager: will scan for all dvcs advertising: %@", servicesString);
+    DDLogDebug(@"BLE-Finder: will scan for all dvcs advertising: %@", servicesString);
 }
 
 
