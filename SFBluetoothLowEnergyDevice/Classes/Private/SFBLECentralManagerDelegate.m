@@ -96,9 +96,6 @@ static NSArray* __managerStateStrings;
   NSAssert(self.bleCentral.state != CBCentralManagerStateUnsupported, @"Call should not come through in this state");
   NSAssert(self.bleCentral.state != CBCentralManagerStateUnauthorized, @"Call should not come through in this state");
 
-  NSString* servicesString = [[advertisedServices valueForKeyPath:@"@unionOfObjects.description"] componentsJoinedByString:@", "];
-  DDLogDebug(@"BLE-CentralDelegate: will start scanning for devs advertising: %@", servicesString);
-
   self.servicesToScanFor = advertisedServices;
 
   self.shouldScan = YES;

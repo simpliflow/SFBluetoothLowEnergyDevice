@@ -170,6 +170,7 @@ static dispatch_queue_t __bleQueue;
                         self.identifierToScanFor = identifier;
                         self.nameToScanFor = nil;
                         self.discoveredDevices = [@{} mutableCopy];
+                        [self logScanStart];
                         [self.centralDelegate scanForPeripheralsAdvertising:self.advertisedServices];
   );
 }
@@ -194,6 +195,7 @@ static dispatch_queue_t __bleQueue;
                         self.nameToScanFor = name;
                         self.identifierToScanFor = nil;
                         self.discoveredDevices = [@{} mutableCopy];
+                        [self logScanStart];
                         [self.centralDelegate scanForPeripheralsAdvertising:self.advertisedServices];
                         );
 }
@@ -314,6 +316,25 @@ static dispatch_queue_t __bleQueue;
   if ([self.delegate respondsToSelector:@selector(bluetoothAvailableAgain)]) {
     [self.delegate bluetoothAvailableAgain];
   }
+}
+
+
+
+
+#pragma mark -
+#pragma mark Helper Methods
+
+
+- (void)logScanStart
+{
+  NSString* servicesString = [[self.advertisedServices valueForKeyPath:@"@unionOfObjects.description"] componentsJoinedByString:@", "];
+  
+  if (self.identifierToScanFor)
+    DDLogDebug(@"BLE-Manager: will scan for dvc with name \"%@\" advertising: %@", self.identifierToScanFor, servicesString);
+  else if (self.nameToScanFor)
+    DDLogDebug(@"BLE-Manager: will scan for dvc with id \"%@\" advertising: %@", self.nameToScanFor, servicesString);
+  else
+    DDLogDebug(@"BLE-Manager: will scan for all dvcs advertising: %@", servicesString);
 }
 
 
