@@ -53,33 +53,33 @@ static dispatch_queue_t __bleQueue;
 }
 
 
-+ (NSError*)error:(SFBluetoothSmartError)errorCode
++ (NSError*)error:(SFBluetoothLowEnergyError)errorCode
 {
   NSString* description = nil;
   switch (errorCode) {
-    case SFBluetoothSmartErrorNoBluetooth:
+    case SFBluetoothLowEnergyErrorNoBluetooth:
       description = @"Bluetooth not available";
       break;
-    case SFBluetoothSmartErrorNoDeviceFound:
+    case SFBluetoothLowEnergyErrorNoDeviceFound:
       description = @"No device found";
       break;
-    case SFBluetoothSmartErrorDeviceForIdentifierNotFound:
-    case SFBluetoothSmartErrorDeviceForNameNotFound:
+    case SFBluetoothLowEnergyErrorDeviceForIdentifierNotFound:
+    case SFBluetoothLowEnergyErrorDeviceForNameNotFound:
       description = @"Specific device not found";
       break;
-    case SFBluetoothSmartErrorProblemsInConnectionProcess:
+    case SFBluetoothLowEnergyErrorProblemsInConnectionProcess:
       description = @"Problems in connection process";
       break;
-    case SFBluetoothSmartErrorProblemsInDiscoveryProcess:
+    case SFBluetoothLowEnergyErrorProblemsInDiscoveryProcess:
       description = @"Problems in discovery process";
       break;
-    case SFBluetoothSmartErrorConnectionClosedByDevice:
+    case SFBluetoothLowEnergyErrorConnectionClosedByDevice:
       description = @"Connection closed by device";
       break;
-    case SFBluetoothSmartErrorOtherCBError:
+    case SFBluetoothLowEnergyErrorOtherCBError:
       description = @"Other CoreBluetooth error";
       break;
-    case SFBluetoothSmartErrorUnknown:
+    case SFBluetoothLowEnergyErrorUnknown:
       description = @"Unknown error";
       break;
   }
@@ -156,7 +156,7 @@ static dispatch_queue_t __bleQueue;
     return;
   
   if (self.bluetoothIsNotAvailable) {
-    DISPATCH_ON_MAIN_QUEUE([self.delegate finderStoppedFindWithError:[SFBLEDeviceFinder error:SFBluetoothSmartErrorNoBluetooth]]);
+    DISPATCH_ON_MAIN_QUEUE([self.delegate finderStoppedFindWithError:[SFBLEDeviceFinder error:SFBluetoothLowEnergyErrorNoBluetooth]]);
     return;
   }
   
@@ -181,7 +181,7 @@ static dispatch_queue_t __bleQueue;
     return;
   
   if (self.bluetoothIsNotAvailable) {
-    DISPATCH_ON_MAIN_QUEUE([self.delegate finderStoppedFindWithError:[SFBLEDeviceFinder error:SFBluetoothSmartErrorNoBluetooth]]);
+    DISPATCH_ON_MAIN_QUEUE([self.delegate finderStoppedFindWithError:[SFBLEDeviceFinder error:SFBluetoothLowEnergyErrorNoBluetooth]]);
     return;
   }
   
@@ -229,7 +229,7 @@ static dispatch_queue_t __bleQueue;
     DDLogInfo(@"BLE-Finder: scan timed out. Specific device not found");
     
     NSError* SFBLEError;
-    SFBluetoothSmartError errorCode = self.identifierToScanFor ? SFBluetoothSmartErrorDeviceForIdentifierNotFound : SFBluetoothSmartErrorDeviceForNameNotFound;
+    SFBluetoothLowEnergyError errorCode = self.identifierToScanFor ? SFBluetoothLowEnergyErrorDeviceForIdentifierNotFound : SFBluetoothLowEnergyErrorDeviceForNameNotFound;
     SFBLEError = [SFBLEDeviceFinder error:errorCode];
     
     DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate finderFoundDevices:self.discoveredDevices.allValues error:SFBLEError]);
@@ -240,7 +240,7 @@ static dispatch_queue_t __bleQueue;
     
     NSError* SFBLEError;
     if (!self.discoveredDevices.count)
-      SFBLEError = [SFBLEDeviceFinder error:SFBluetoothSmartErrorNoDeviceFound];
+      SFBLEError = [SFBLEDeviceFinder error:SFBluetoothLowEnergyErrorNoDeviceFound];
     
     DISPATCH_ON_MAIN_QUEUE(self.shouldScan = NO; [self.delegate finderFoundDevices:self.discoveredDevices.allValues error:SFBLEError]);
   }
@@ -299,7 +299,7 @@ static dispatch_queue_t __bleQueue;
     [self executeStoppingScanDuties];
     DISPATCH_ON_MAIN_QUEUE(
                            self.shouldScan = NO;
-                           [self.delegate finderStoppedFindWithError:[SFBLEDeviceFinder error:SFBluetoothSmartErrorNoBluetooth]];
+                           [self.delegate finderStoppedFindWithError:[SFBLEDeviceFinder error:SFBluetoothLowEnergyErrorNoBluetooth]];
     );
   }
   

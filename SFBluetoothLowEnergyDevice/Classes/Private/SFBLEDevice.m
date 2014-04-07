@@ -173,7 +173,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
   DDLogDebug(@"BLE-Device: linking failed");
 
   if (SFError)
-    NSAssert([SFError.domain isEqualToString:[SFBLEDeviceFinder error:SFBluetoothSmartErrorUnknown].domain], @"Apple error leaking to outside");
+    NSAssert([SFError.domain isEqualToString:[SFBLEDeviceFinder error:SFBluetoothLowEnergyErrorUnknown].domain], @"Apple error leaking to outside");
 
   self.state = SFBLEDeviceStateUnlinked;
   DISPATCH_ON_MAIN_QUEUE(
@@ -191,7 +191,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
   DDLogDebug(@"BLE-Device: disconnected");
 
   if (SFError)
-    NSAssert([SFError.domain isEqualToString:[SFBLEDeviceFinder error:SFBluetoothSmartErrorUnknown].domain], @"Apple error leaking to outside");
+    NSAssert([SFError.domain isEqualToString:[SFBLEDeviceFinder error:SFBluetoothLowEnergyErrorUnknown].domain], @"Apple error leaking to outside");
   
   switch (self.state) {
     case SFBLEDeviceStateLinking:
@@ -240,7 +240,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 
 - (void)bluetoothNotAvailable
 {
-  [self disconnected:[SFBLEDeviceFinder error:SFBluetoothSmartErrorNoBluetooth]];
+  [self disconnected:[SFBLEDeviceFinder error:SFBluetoothLowEnergyErrorNoBluetooth]];
 //  [self.bleCentral cancelPeripheralConnection:device.peripheral];
 }
 
@@ -284,7 +284,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
   // the connection does not time out automatically, we have to do this explicitly
   [self.centralDelegate cancelConnectionToDevice:self];
   
-  [self linkingFailed:[SFBLEDeviceFinder error:SFBluetoothSmartErrorProblemsInConnectionProcess]];
+  [self linkingFailed:[SFBLEDeviceFinder error:SFBluetoothLowEnergyErrorProblemsInConnectionProcess]];
 }
 
 
@@ -300,7 +300,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
   // TODO: filter out apple errors (you should be able to let SFBLEErrors through)
   if (error) {
     NSString* localizedDescription = [NSString stringWithFormat:@"%@: %@", @(error.code), error.localizedDescription];
-    sfError = [SFBLEDeviceFinder error:SFBluetoothSmartErrorOtherCBError];
+    sfError = [SFBLEDeviceFinder error:SFBluetoothLowEnergyErrorOtherCBError];
     sfError = [NSError errorWithDomain:sfError.domain code:sfError.code userInfo:@{NSLocalizedDescriptionKey: localizedDescription}];
   }
   
@@ -340,7 +340,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
   // a connectToPeripheral: does not time out, we have to cancel explicitly
   [self.centralDelegate cancelConnectionToDevice:self];
   
-  [self linkingFailed:[SFBLEDeviceFinder error:SFBluetoothSmartErrorProblemsInDiscoveryProcess]];
+  [self linkingFailed:[SFBLEDeviceFinder error:SFBluetoothLowEnergyErrorProblemsInDiscoveryProcess]];
 }
 
 
@@ -358,11 +358,11 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
     DDLogInfo(@"BLE-Device: disconnected from %@ with error (%@ %d: %@).", self.peripheral.name, error.domain, error.code, error.localizedDescription);
     
     if (error.code == CBErrorPeripheralDisconnected) {
-      sfError = [SFBLEDeviceFinder error:SFBluetoothSmartErrorConnectionClosedByDevice];
+      sfError = [SFBLEDeviceFinder error:SFBluetoothLowEnergyErrorConnectionClosedByDevice];
     }
     else {
       NSString* localizedDescription = [NSString stringWithFormat:@"%@: %@", @(error.code), error.localizedDescription];
-      sfError = [SFBLEDeviceFinder error:SFBluetoothSmartErrorOtherCBError];
+      sfError = [SFBLEDeviceFinder error:SFBluetoothLowEnergyErrorOtherCBError];
       sfError = [NSError errorWithDomain:sfError.domain code:sfError.code userInfo:@{NSLocalizedDescriptionKey: localizedDescription}];
     }
   }

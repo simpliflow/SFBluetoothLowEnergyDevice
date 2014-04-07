@@ -13,17 +13,17 @@
 
 
 
-// Error codes for NSErrors, domain is "SFBluetoothSmartDevice"
-typedef NS_ENUM(NSInteger, SFBluetoothSmartError) {
-  SFBluetoothSmartErrorNoBluetooth = 1,
-  SFBluetoothSmartErrorNoDeviceFound,
-  SFBluetoothSmartErrorDeviceForIdentifierNotFound,
-  SFBluetoothSmartErrorDeviceForNameNotFound,
-  SFBluetoothSmartErrorProblemsInConnectionProcess,
-  SFBluetoothSmartErrorProblemsInDiscoveryProcess,
-  SFBluetoothSmartErrorConnectionClosedByDevice,
-  SFBluetoothSmartErrorOtherCBError,
-  SFBluetoothSmartErrorUnknown
+// Error codes for NSErrors, domain is kSFBluetoothLowEnergyErrorDomain
+typedef NS_ENUM(NSInteger, SFBluetoothLowEnergyError) {
+  SFBluetoothLowEnergyErrorNoBluetooth = 1,
+  SFBluetoothLowEnergyErrorNoDeviceFound,
+  SFBluetoothLowEnergyErrorDeviceForIdentifierNotFound,
+  SFBluetoothLowEnergyErrorDeviceForNameNotFound,
+  SFBluetoothLowEnergyErrorProblemsInConnectionProcess,
+  SFBluetoothLowEnergyErrorProblemsInDiscoveryProcess,
+  SFBluetoothLowEnergyErrorConnectionClosedByDevice,
+  SFBluetoothLowEnergyErrorOtherCBError,
+  SFBluetoothLowEnergyErrorUnknown
 };
 
 extern NSString* const kSFBluetoothLowEnergyErrorDomain;
@@ -34,7 +34,7 @@ extern NSString* const kSFBluetoothLowEnergyErrorDomain;
 
 @interface SFBLEDeviceFinder : NSObject
 
-+ (NSError*)error:(SFBluetoothSmartError)errorCode;
++ (NSError*)error:(SFBluetoothLowEnergyError)errorCode;
 
 @property (nonatomic, assign) NSObject<SFBLEDeviceFinderDelegate>* delegate;
 
@@ -50,13 +50,13 @@ extern NSString* const kSFBluetoothLowEnergyErrorDomain;
 // * if the device is not found within the timeout, bleDevices of finderFoundDevices:error:
 //    contains all devices that have been found (advertising the services as defined
 //    by the init method of this class of course), and an error (code is either
-//    SFBluetoothSmartErrorDeviceForIdentifierNotFound or SFBluetoothSmartErrorDeviceForNameNotFound).
+//    SFBluetoothLowEnergyErrorDeviceForIdentifierNotFound or SFBluetoothLowEnergyErrorDeviceForNameNotFound).
 // * if nil has been provided for name or identifier and if one or more devices have
 //    been found they are contained in bleDevices of finderFoundDevices:error: and the
 //    error is nil
 // * if nil has been provided for name or identifier and no devices have been found
 //    bleDevices of finderFoundDevices:error: is an empty array and the error's code
-//    is SFBluetoothSmartErrorNoDeviceFound.
+//    is SFBluetoothLowEnergyErrorNoDeviceFound.
 - (void)findDeviceWithIdentifier:(NSUUID*)identifier timeout:(NSTimeInterval)timeout;
 - (void)findDeviceWithName:(NSString*)name timeout:(NSTimeInterval)timeout;
 
