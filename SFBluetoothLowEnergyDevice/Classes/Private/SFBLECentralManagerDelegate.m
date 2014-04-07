@@ -22,6 +22,8 @@
 
 @property (nonatomic) CBCentralManager* bleCentral;
 
+// the central delegate keeps a reference to the BLEDevice in devicesByPeripheral starting from
+// the call to connectToDevice: as long as it is in the connection process or connected
 @property (nonatomic) NSMutableDictionary* devicesByPeripheral;
 
 // Indicates if the central manager should scan
@@ -125,8 +127,6 @@ static NSArray* __managerStateStrings;
 #pragma mark SFBLEDevice
 
 
-// the central delegate keeps a reference to the BLEDevice in devicesByPeripheral starting from
-// the call to connectToDevice: as long as it is in the connection process or connected
 - (void)connectToDevice:(SFBLEDevice*)device
 {
   NSAssert(!self.devicesByPeripheral[device.peripheral], @"Connect call although is already connected or connecting");
