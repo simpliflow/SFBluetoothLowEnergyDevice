@@ -19,6 +19,7 @@ typedef NS_ENUM(NSInteger, SFBluetoothLowEnergyError) {
   SFBluetoothLowEnergyErrorNoDeviceFound,
   SFBluetoothLowEnergyErrorDeviceForIdentifierNotFound,
   SFBluetoothLowEnergyErrorDeviceForNameNotFound,
+  SFBluetoothLowEnergyErrorLinkingCancelled,
   SFBluetoothLowEnergyErrorProblemsInConnectionProcess,
   SFBluetoothLowEnergyErrorProblemsInDiscoveryProcess,
   SFBluetoothLowEnergyErrorConnectionClosedByDevice,

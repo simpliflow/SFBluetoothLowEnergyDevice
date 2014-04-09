@@ -116,8 +116,6 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 }
 
 
-// Unlinking does not report a successful disconnection to the outside,
-// nonetheless it has to keep track of the current state of the link.
 - (void)unlink
 {
   DDLogDebug(@"BLE-Device: starting unlink");
@@ -132,7 +130,9 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
                           case SFBLEDeviceStateLinking:
                             [self invalidateConnectTimer];
                             [self.peripheralDelegate invalidateDiscoveryTimer];
-                            // break is left out on purpose
+                            DISPATCH_ON_MAIN_QUEUE([self.delegate device:self failedToLink:[SFBLEDeviceFinder error:SFBluetoothLowEnergyErrorLinkingCancelled]]);
+                            [self.centralDelegate cancelConnectionToDevice:self];
+                            break;
                           case SFBLEDeviceStateLinked:
                             self.state = SFBLEDeviceStateUnlinking;
                             [self.centralDelegate cancelConnectionToDevice:self];
@@ -228,6 +228,9 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
                                                        [self connect];
                                                      }
                                                      );
+                             }
+                             else {
+                               [self.delegate device:self unlinked:nil];
                              }
                              );
       break;

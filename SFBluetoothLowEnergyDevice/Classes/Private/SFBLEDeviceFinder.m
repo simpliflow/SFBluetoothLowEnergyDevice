@@ -67,6 +67,9 @@ static dispatch_queue_t __bleQueue;
     case SFBluetoothLowEnergyErrorDeviceForNameNotFound:
       description = @"Specific device not found";
       break;
+    case SFBluetoothLowEnergyErrorLinkingCancelled:
+      description = @"Linking cancelled by app.";
+      break;
     case SFBluetoothLowEnergyErrorProblemsInConnectionProcess:
       description = @"Problems in connection process";
       break;

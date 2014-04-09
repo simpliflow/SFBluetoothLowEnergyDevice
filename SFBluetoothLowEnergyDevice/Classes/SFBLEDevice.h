@@ -20,6 +20,9 @@
 
 // do not forget to set the delegate before calling
 - (void)link;
+// If the device is still in the linking process you will be sent
+// device:failedToLink: (with an error SFBluetoothSmartErrorLinkingCancelled)
+// otherwise device:unliked:
 - (void)unlink;
 
 @property (nonatomic, readonly) NSString* name;
