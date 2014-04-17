@@ -109,12 +109,13 @@ static dispatch_queue_t __bleQueue;
     //  to be of the class CBUUID.
     NSArray* characteristics = [servicesAndCharacteristics.allValues valueForKeyPath:@"@unionOfArrays.self"];
     
-    // advertisedServices may be nil
-    NSArray* toBeTested;
+    NSMutableArray* toBeTested = [@[] mutableCopy];
+    if (servicesAndCharacteristics)
+      [toBeTested addObject:servicesAndCharacteristics.allKeys];
+    if (characteristics)
+      [toBeTested addObject:characteristics];
     if (advertisedServices)
-      toBeTested = @[servicesAndCharacteristics.allKeys, characteristics, advertisedServices];
-    else
-      toBeTested = @[servicesAndCharacteristics.allKeys, characteristics];
+      [toBeTested addObject:advertisedServices];
     
     for (NSArray* shouldBeUUIDs in toBeTested) {
       for (id shouldBeUUID in shouldBeUUIDs) {
@@ -122,6 +123,7 @@ static dispatch_queue_t __bleQueue;
           return nil;
       }
     }
+    
     // Check
     //   * if the characteristics are unique
     NSMutableArray* characteristicsCheck = [@[] mutableCopy];
