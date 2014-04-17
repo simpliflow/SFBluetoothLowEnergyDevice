@@ -24,7 +24,6 @@
 {
   [super viewDidLoad];
   
-  
   self.finder = [SFBLEDeviceFinder finderForDevicesWithServicesAndCharacteristics:nil advertising:nil];
 }
 
