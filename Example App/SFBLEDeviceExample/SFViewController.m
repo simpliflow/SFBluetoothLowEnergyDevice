@@ -17,6 +17,12 @@
 
 
 
+NSString* const BLEServiceHeartRate         = @"180D";
+NSString* const BLECharHeartRateMeasurement = @"2A37";
+
+
+
+
 @implementation SFViewController
 
 
@@ -24,13 +30,12 @@
 {
   [super viewDidLoad];
   
-  self.finder = [SFBLEDeviceFinder finderForDevicesWithServicesAndCharacteristics:nil advertising:nil];
-}
-
-
-- (void)didReceiveMemoryWarning
-{
-  [super didReceiveMemoryWarning];
+  NSDictionary* HRServsAndCharacs = @{
+                                      [CBUUID UUIDWithString:BLEServiceHeartRate] : @[[CBUUID UUIDWithString:BLECharHeartRateMeasurement]]
+                                      };
+  
+  self.finder = [SFBLEDeviceFinder finderForDevicesWithServicesAndCharacteristics:HRServsAndCharacs advertising:@[[CBUUID UUIDWithString:BLEServiceHeartRate]]];
+  self.finder.delegate = self;
 }
 
 
@@ -43,12 +48,19 @@
 - (IBAction)startFind:(id)sender
 {
   [self.finder findDevices:5];
+  self.stateLabel.text = @"Finding…";
 }
 
 
-- (IBAction)disconnect:(id)sender
+- (IBAction)link:(id)sender
 {
-  
+  [self.device link];
+}
+
+
+- (IBAction)unlink:(id)sender
+{
+  [self.device unlink];
 }
 
 
@@ -61,7 +73,11 @@
 - (void)finderFoundDevices:(NSArray*)bleDevices error:(NSError*)error
 {
   if (bleDevices.count) {
+    self.stateLabel.text = @"Linking…";
     self.device = bleDevices.firstObject;
+  }
+  else {
+    self.stateLabel.text = @"Not found";
   }
 }
 
@@ -92,19 +108,22 @@
 
 - (void)deviceLinkedSuccessfully:(SFBLEDevice*)device
 {
-
+  NSAssert(self.device == device, @"We should not connect to any other device, than the one in the ivar");
+  
+  [device subscribeToCharacteristic:[CBUUID UUIDWithString:BLECharHeartRateMeasurement]];
+  self.stateLabel.text = @"Linked";
 }
 
 
 - (void)device:(SFBLEDevice*)SFBLEDevice failedToLink:(NSError*)error
 {
-
+  self.stateLabel.text = @"Link failed";
 }
 
 
 - (void)device:(SFBLEDevice*)SFBLEDevice unlinked:(NSError*)error
 {
-
+  self.stateLabel.text = @"Unlinked";
 }
 
 

@@ -27,13 +27,13 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eMm-gL-LCd">
-                                <rect key="frame" x="121" y="479" width="78" height="30"/>
+                                <rect key="frame" x="139" y="479" width="43" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Disconnect">
+                                <state key="normal" title="Unlink">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <action selector="disconnect:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="5Y7-3K-s7F"/>
+                                    <action selector="unlink:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="06c-fl-YKD"/>
                                 </connections>
                             </button>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mae-Jz-NPM">
@@ -44,11 +44,14 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IrZ-Dc-7Es">
-                                <rect key="frame" x="131" y="441" width="59" height="30"/>
+                                <rect key="frame" x="145" y="441" width="30" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Connect">
+                                <state key="normal" title="Link">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
+                                <connections>
+                                    <action selector="link:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="xOF-KZ-XZd"/>
+                                </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
@@ -63,6 +66,9 @@
                             <constraint firstItem="eMm-gL-LCd" firstAttribute="top" secondItem="IrZ-Dc-7Es" secondAttribute="bottom" constant="8" id="ysh-Wm-2QN"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="stateLabel" destination="mae-Jz-NPM" id="K5t-8r-ud3"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>

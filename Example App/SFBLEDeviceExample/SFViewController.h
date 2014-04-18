@@ -12,9 +12,18 @@
 
 
 
+extern NSString* const BLEServiceHeartRate;
+extern NSString* const BLECharHeartRateMeasurement;
+
+
+
+
 @interface SFViewController : UIViewController <SFBLEDeviceDelegate, SFBLEDeviceFinderDelegate>
 
+@property (weak, nonatomic) IBOutlet UILabel* stateLabel;
+
 - (IBAction)startFind:(id)sender;
-- (IBAction)disconnect:(id)sender;
+- (IBAction)link:(id)sender;
+- (IBAction)unlink:(id)sender;
 
 @end
