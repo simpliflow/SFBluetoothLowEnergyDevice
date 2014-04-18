@@ -1,43 +1,55 @@
 # SFBluetoothLowEnergyDevice, Beta
-An opinionated wrapper for CoreBluetooth to ease the communication with simple Bluetooth Low Energy (Bluetooth smart, Bluetooth 4.0, BLE) devices.
+A wrapper for CoreBluetooth easy interaction with simple Bluetooth Low Energy (Bluetooth smart, Bluetooth 4.0, BLE) devices.
 
-It assumes that you know the service and characteristic UUIDs of the device you want to communicate with and which of these services are advertised. All BLE actions (scanning, connecting, discovering, writing, reading) are handled on a separate queue, all delegate callbacks are returned on the main queue.
-
+ All BLE actions (scanning, connecting, discovering, writing, reading) are handled on a background queue, you work on the main thread, without worrying about concurrency.
+It assumes that you know the service and characteristic UUIDs of the device you want to communicate with and which of these services are advertised. If you include the battery service and characteristic, the pod takes care of regular updates.
 
 ## Getting started (by example of a heart rate belt)
-1. create an SFBLEDeviceManager by providing the creation method with a dictionary containing the service UUIDs-Strings as keys and the characteristic UUIDs-Strings in an array set as values for those keys.
+1. create an SFBLEDeviceFinder by providing the creation method with a dictionary containing the service UUIDs-Strings as keys and the characteristic UUIDs-Strings in an array set as values for those keys.
 
-        NSString* BLEServiceHeartRate         = @"180D";
-        NSString* BLECharHeartRateMeasurement = @"2A37";
-	      NSDictionary* HRServsAndCharacs = @{
-                                  BLEServiceHeartRate :    @[BLECharHeartRateMeasurement]
-                                             };
-        SFBLEDeviceManager* deviceManager = [SFBLEDeviceManager managerForDevicesWithServicesAndCharacteristics:HRServsAndCharacs advertising:@[BLEServiceHeartRate]];
-        deviceManager.delegate = self;
+```objc
+CBUUID* BLEServiceHeartRate         = [CBUUID UUIDWithString:@"180D"];
+CBUUID* BLECharHeartRateMeasurement = [CBUUID UUIDWithString:@"2A37"];
+NSDictionary* HRServsAndCharacs = @{
+                          BLEServiceHeartRate :    @[BLECharHeartRateMeasurement]
+                                     };
+SFBLEDeviceManager* finder = [SFBLEDeviceFinder managerForDevicesWithServicesAndCharacteristics:HRServsAndCharacs advertising:@[BLEServiceHeartRate]];
+finder.delegate = self;
+```
 
-2. Start scanning for any device (or for a device with a specific identifier)
+2. Start scanning for any device
 
-        [deviceManager scanFor:nil timeout:3.0];
+```objc
+[finder findDevices:3.0];
+```
 
 3. The delegate callback `managerFoundDevices:` will send you all found devices. Take one and link to it.
 
-        - (void)managerFoundDevices:(NSArray*)bleDevices {
-          SFBLEDevice* heartRateBelt = bleDevices.firstObject;
-          heartRateBelt.delegate = self;
-          [heartRateBelt link];
-        }
+```objc
+- (void)finderFoundDevices:(NSArray*)bleDevices error:(NSError*)error {
+  if (bleDevices.count) {
+    SFBLEDevice* heartRateBelt = bleDevices.firstObject;
+    heartRateBelt.delegate = self;
+    [heartRateBelt link];
+  }
+}
+```
 
-4. The device will now connect to the peripheral and discover all services and characteristics that you specified. Upon success, `deviceLinkedSuccessfully:` will be called on your device's delegate. You could then e.g. subscribe to updates to a characteristic.
+4. The device will connect itself to the peripheral and discover all services and characteristics that you specified. Upon success, `deviceLinkedSuccessfully:` will be called on your device's delegate. You could then e.g. subscribe to updates to a characteristic.
 
-        - (void)deviceLinkedSuccessfully:(SFBLEDevice*)device {
-          [device subscribeToCharacteristic:BLECharHeartRateMeasurement];
-        }
+```objc
+- (void)deviceLinkedSuccessfully:(SFBLEDevice*)device {
+  [device subscribeToCharacteristic:BLECharHeartRateMeasurement];
+}
+```
 
 5. Updates will then be delivered to your device's delegate via `device:receivedData:fromCharacteristic:`.
 
 6. To cut the connection to the peripheral call `unlink`.
 
-        [device unlink];
+```objc
+[device unlink];
+```
 
 
 ## Purpose and Intention
@@ -49,4 +61,10 @@ The Pod has a limited reporting of errors that happen during the search-connect 
 ## Limitations
 Due to its simplified nature the wrapper does not allow for:
 * usage of the same characteristic in more than one service of interest (i.e. if you had a device that would offer the services "Health Thermometer" and "Environment Temperature" both including the characteristic `org.bluetooth.characteristic.temperature_measurement`, you could only include one of the two services since the wrapper does not allow for a distinction between characteristics according to the service they are included in).
-* multiple instances of the same device are not supported –  same refers to the array of advertised services. Also, you will not be able to create two instances to work with different parts of the same physical BLE device (but that is a limitation of CoreBluetooth as well and not intended by the Bluetooth specification either).
+* multiple SFBLEDevice instances for the same physical BLE device are not supported.
+
+
+## Questions
+**Why is it called __linking__ and not connecting?**
+
+To be able to interact with the device you need to do more than connecting, in the sense that the word _connect_ is used in the CoreBluetooth framework. You also need to discover the services and characteristics, which is all handled by the pod for you, and to express this I thought _linking_ would be more approriate than _connecting_.
