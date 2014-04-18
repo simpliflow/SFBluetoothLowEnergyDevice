@@ -39,6 +39,20 @@ NSString* const BLECharHeartRateMeasurement = @"2A37";
 }
 
 
+- (void)setDevice:(SFBLEDevice*)device
+{
+  if (_device == device)
+    return;
+  
+  [_device unlink];
+  _device.delegate = nil;
+  
+  _device = device;
+  
+  _device.delegate = self;
+}
+
+
 
 
 #pragma mark -
@@ -47,7 +61,8 @@ NSString* const BLECharHeartRateMeasurement = @"2A37";
 
 - (IBAction)startFind:(id)sender
 {
-  [self.finder findDevices:5];
+  self.device = nil;
+  [self.finder findDevices:3.5];
   self.stateLabel.text = @"Finding…";
 }
 
@@ -55,6 +70,7 @@ NSString* const BLECharHeartRateMeasurement = @"2A37";
 - (IBAction)link:(id)sender
 {
   [self.device link];
+  self.stateLabel.text = @"Linking…";
 }
 
 
@@ -73,7 +89,7 @@ NSString* const BLECharHeartRateMeasurement = @"2A37";
 - (void)finderFoundDevices:(NSArray*)bleDevices error:(NSError*)error
 {
   if (bleDevices.count) {
-    self.stateLabel.text = @"Linking…";
+    self.stateLabel.text = @"Found";
     self.device = bleDevices.firstObject;
   }
   else {
@@ -129,7 +145,9 @@ NSString* const BLECharHeartRateMeasurement = @"2A37";
 
 - (void)device:(SFBLEDevice*)device receivedData:(NSData*)data fromCharacteristic:(CBUUID*)uuid
 {
-
+  UInt8 heartRate;
+  [data getBytes:&heartRate range:NSMakeRange(1, 1)];
+  self.hrLabel.text = @(heartRate).stringValue;
 }
 
 

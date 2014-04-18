@@ -53,20 +53,30 @@
                                     <action selector="link:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="xOF-KZ-XZd"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="HR" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MhS-wo-ehG">
+                                <rect key="frame" x="148" y="129" width="25" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="mae-Jz-NPM" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" constant="218" id="0Ox-nz-O6g"/>
                             <constraint firstAttribute="centerX" secondItem="IrZ-Dc-7Es" secondAttribute="centerX" id="4cR-bR-b0d"/>
                             <constraint firstAttribute="centerX" secondItem="eMm-gL-LCd" secondAttribute="centerX" id="9VX-Zl-jgn"/>
+                            <constraint firstItem="mae-Jz-NPM" firstAttribute="top" secondItem="MhS-wo-ehG" secondAttribute="bottom" constant="88" id="K36-FY-Hwk"/>
                             <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="eMm-gL-LCd" secondAttribute="bottom" constant="59" id="bAx-Ki-PJz"/>
                             <constraint firstItem="IrZ-Dc-7Es" firstAttribute="top" secondItem="Yau-PA-Mpe" secondAttribute="bottom" constant="8" id="fau-30-FUf"/>
                             <constraint firstAttribute="centerX" secondItem="Yau-PA-Mpe" secondAttribute="centerX" id="fh0-aW-qXi"/>
                             <constraint firstAttribute="centerX" secondItem="mae-Jz-NPM" secondAttribute="centerX" id="hdh-k1-Jk9"/>
+                            <constraint firstAttribute="centerX" secondItem="MhS-wo-ehG" secondAttribute="centerX" constant="-0.5" id="sSS-I0-Set"/>
                             <constraint firstItem="eMm-gL-LCd" firstAttribute="top" secondItem="IrZ-Dc-7Es" secondAttribute="bottom" constant="8" id="ysh-Wm-2QN"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="hrLabel" destination="MhS-wo-ehG" id="BQu-EY-AAF"/>
                         <outlet property="stateLabel" destination="mae-Jz-NPM" id="K5t-8r-ud3"/>
                     </connections>
                 </viewController>

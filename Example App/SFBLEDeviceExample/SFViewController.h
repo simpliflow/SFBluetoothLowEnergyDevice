@@ -21,6 +21,7 @@ extern NSString* const BLECharHeartRateMeasurement;
 @interface SFViewController : UIViewController <SFBLEDeviceDelegate, SFBLEDeviceFinderDelegate>
 
 @property (weak, nonatomic) IBOutlet UILabel* stateLabel;
+@property (weak, nonatomic) IBOutlet UILabel* hrLabel;
 
 - (IBAction)startFind:(id)sender;
 - (IBAction)link:(id)sender;
