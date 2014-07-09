@@ -135,8 +135,10 @@
     self.characteristicsByUUID[characteristic.UUID] = characteristic;
   }
   NSArray* charsOfService = self.servicesAndCharacteristics[service.UUID];
+  
   if (charsOfService.count != service.characteristics.count) {
-    // TODO: abort, inconsistency between discovered and prescribed characteristics in service
+    NSArray* missingServices = [charsOfService filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"NOT (SELF IN %@)", [service.characteristics valueForKeyPath:@"UUID"]]];
+    DDLogWarn(@"BLE-PeripheralDelegate: inconsistency in characteristics discovery for service %@. Searched for %d, discovered only %d (missing: %@)", service.UUID, charsOfService.count, service.characteristics.count, [missingServices componentsJoinedByString:@", "]);
   }
   
   if (self.servicesByUUID.count == self.servicesAndCharacteristics.count) {
