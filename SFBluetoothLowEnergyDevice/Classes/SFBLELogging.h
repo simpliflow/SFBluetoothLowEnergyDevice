@@ -5,7 +5,7 @@
 //  Created by Thomas Billicsich on 2014-04-04.
 //  Copyright (c) 2014 Thomas Billicsich. All rights reserved.
 
-#import "DDLog.h"
+#import <CocoaLumberjack/CocoaLumberjack.h>
 
 
 // To define a different local (per file) log level
