@@ -209,6 +209,12 @@
 }
 
 
+- (void)peripheralDidUpdateName:(CBPeripheral *)peripheral
+{
+  DDLogDebug(@"peripheralDidUpdateName: %@", peripheral);
+}
+
+
 @end
 
 
