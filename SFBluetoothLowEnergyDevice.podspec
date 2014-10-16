@@ -9,7 +9,7 @@ Pod::Spec.new do |spec|
   spec.authors      = 'Thomas Billicsich'
   spec.source_files     = 'SFBluetoothLowEnergyDevice/Classes/*.{h,m}'
   spec.source     = { :git => 'https://github.com/simpliflow/SFBluetoothLowEnergyDevice.git', :tag => 'v0.10.1' }
-  spec.dependency  'CocoaLumberjack'
+  spec.dependency  'CocoaLumberjack', '~> 1.9.2'
   spec.framework  = 'CoreBluetooth'
   spec.requires_arc = true
 end
