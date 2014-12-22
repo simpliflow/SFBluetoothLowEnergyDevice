@@ -174,6 +174,13 @@
   [self.device.peripheral writeValue:value forCharacteristic:characteristic type:CBCharacteristicWriteWithResponse];
 }
 
+- (void)writeValueWithoutResponse:(NSData*)value forCharacteristic:(CBUUID*)characteristicUUID
+{
+  // TODO: allow for both types of writing (w/ and w/o response)
+  CBCharacteristic* characteristic = self.characteristicsByUUID[characteristicUUID];
+  [self.device.peripheral writeValue:value forCharacteristic:characteristic type:CBCharacteristicWriteWithoutResponse];
+}
+
 
 - (void)subscribeToCharacteristic:(CBUUID*)characteristicUUID
 {

@@ -404,6 +404,16 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
                         );
 }
 
+- (void)writeValueWithoutResponse:(NSData*)value forCharacteristic:(CBUUID*)characteristicUUID
+{
+  DISPATCH_ON_BLE_QUEUE(
+                        if (self.state != SFBLEDeviceStateLinked)
+                        return;
+                        
+                        [self.peripheralDelegate writeValueWithoutResponse:value forCharacteristic:characteristicUUID];
+                        );
+}
+
 
 - (void)subscribeToCharacteristic:(CBUUID*)characteristicUUID
 {

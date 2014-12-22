@@ -32,6 +32,7 @@
 
 - (void)readValueForCharacteristic:(CBUUID*)characteristicUUID;
 - (void)writeValue:(NSData*)value forCharacteristic:(CBUUID*)characteristicUUID;
+- (void)writeValueWithoutResponse:(NSData*)value forCharacteristic:(CBUUID*)characteristicUUID;
 - (void)subscribeToCharacteristic:(CBUUID*)characteristicUUID;
 - (void)unsubscribeFromCharacteristic:(CBUUID*)characteristicUUID;
 
