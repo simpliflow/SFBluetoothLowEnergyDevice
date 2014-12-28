@@ -18,8 +18,10 @@
 
 @property (nonatomic, assign) NSObject<SFBLEDeviceDelegate>* delegate;
 
-// do not forget to set the delegate before calling
+/// do not forget to set the delegate before calling
 - (void)link;
+/// Provide a timeout of 0 to not let the connect time out
+- (void)linkWithTimeout:(NSTimeInterval)timeout;
 // If the device is still in the linking process you will be sent
 // device:failedToLink: (with an error SFBluetoothSmartErrorLinkingCancelled)
 // otherwise device:unliked:
@@ -35,6 +37,9 @@
 - (void)writeValueWithoutResponse:(NSData*)value forCharacteristic:(CBUUID*)characteristicUUID;
 - (void)subscribeToCharacteristic:(CBUUID*)characteristicUUID;
 - (void)unsubscribeFromCharacteristic:(CBUUID*)characteristicUUID;
+
+// Optional differing timeout (-1 = deactivated)
+@property (nonatomic) NSTimeInterval timeout;
 
 @end
 

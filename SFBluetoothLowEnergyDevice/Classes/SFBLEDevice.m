@@ -66,6 +66,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 - (id)initWithPeripheral:(CBPeripheral*)peripheral centralDelegate:(SFBLECentralManagerDelegate*)centralDelegate servicesAndCharacteristics:(NSDictionary*)servicesAndCharacteristics
 {
   if (self = [super init]) {
+    _timeout = -1.0;
     _peripheral = peripheral;
     _identifier = peripheral.identifier;
     _centralDelegate = centralDelegate;
@@ -113,6 +114,13 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
                             break;
                         }
                         );
+}
+
+
+- (void)linkWithTimeout:(NSTimeInterval)timeout
+{
+  self.timeout = timeout;
+  [self link];
 }
 
 
@@ -258,14 +266,24 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 {
   DDLogDebug(@"BLE-Device: starting connect to suitable peripheral: %@", self.peripheral);
   
-  [self startConnectTimer];
+  // Do not timeout if the custom timeout is set to 0
+  if (self.timeout < 0.0 || self.timeout > 0.0) {
+    [self startConnectTimer];
+  }
   [self.centralDelegate connectToDevice:self];
 }
 
 
 - (void)startConnectTimer
 {
-  _connectTimeoutBlock = perform_block_after_delay(CONNECT_TIMEOUT, self.bleQueue, ^{
+  NSTimeInterval timeout;
+  if (self.timeout < 0.0) {
+    timeout = CONNECT_TIMEOUT;
+  }
+  else {
+    timeout = self.timeout;
+  }
+  _connectTimeoutBlock = perform_block_after_delay(timeout, self.bleQueue, ^{
     [self connectTimedOut];
   });
 }
@@ -276,6 +294,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
   if (_connectTimeoutBlock) {
     cancel_delayed_block(_connectTimeoutBlock);
     _connectTimeoutBlock = nil;
+    self.timeout = -1;
   }
 }
 
@@ -398,7 +417,7 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 {
   DISPATCH_ON_BLE_QUEUE(
                         if (self.state != SFBLEDeviceStateLinked)
-                        return;
+                          return;
                         
                         [self.peripheralDelegate writeValue:value forCharacteristic:characteristicUUID];
                         );
