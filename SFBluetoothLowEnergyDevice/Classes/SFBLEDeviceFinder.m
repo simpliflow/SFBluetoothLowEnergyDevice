@@ -205,6 +205,12 @@ static dispatch_queue_t __bleQueue;
 }
 
 
+- (void)findFirstDeviceWithTimeout:(NSTimeInterval)timeout
+{
+  self.stopAfterFirstDevice = YES;
+  [self findDevices:timeout];
+}
+
 
 - (void)startScanTimer
 {
@@ -268,7 +274,8 @@ static dispatch_queue_t __bleQueue;
   }
 
   if ( (self.identifierToScanFor && [self.identifierToScanFor isEqual:peripheral.identifier]) ||
-      (self.nameToScanFor && [self.nameToScanFor isEqualToString:peripheral.name]) )
+      (self.nameToScanFor && [self.nameToScanFor isEqualToString:peripheral.name]) ||
+      self.stopAfterFirstDevice)
   {
     DDLogDebug(@"BLE-Finder: did discover specific peripheral: %@", peripheral);
     [self executeStoppingScanDuties];
@@ -286,6 +293,7 @@ static dispatch_queue_t __bleQueue;
 }
 - (void)executeStoppingScanDuties
 {
+  self.stopAfterFirstDevice = NO;
   [self.centralDelegate stopScan];
   [self invalidateScanTimer];
 }

@@ -60,6 +60,7 @@ extern NSString* const kSFBluetoothLowEnergyErrorDomain;
 //    is SFBluetoothLowEnergyErrorNoDeviceFound.
 - (void)findDeviceWithIdentifier:(NSUUID*)identifier timeout:(NSTimeInterval)timeout;
 - (void)findDeviceWithName:(NSString*)name timeout:(NSTimeInterval)timeout;
+- (void)findFirstDeviceWithTimeout:(NSTimeInterval)timeout;
 
 // Stops a find, does nothing if no find is in progress.
 - (void)stopFind;
