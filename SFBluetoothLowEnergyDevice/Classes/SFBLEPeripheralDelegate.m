@@ -30,6 +30,9 @@
 @property (nonatomic) NSMutableDictionary* characteristicsByUUID;
 @property (nonatomic) NSMutableDictionary* servicesByUUID;
 
+// Used during the linking process
+@property (nonatomic) NSArray* discoveredServices;
+
 @end
 
 
@@ -110,9 +113,9 @@
 
 - (void)peripheral:(CBPeripheral*)peripheral didDiscoverServices:(NSError*)error
 {
-  NSArray* services = peripheral.services;
+  self.discoveredServices = peripheral.services;
   
-  for (CBService* service in services) {
+  for (CBService* service in self.discoveredServices) {
     NSArray* characteristicsToDiscover = self.servicesAndCharacteristics[service.UUID];
 //    DDLogDebug(@"BLE-PeripheralDelegate: starting characteristic discovery for service %@: %@", service.UUID, [[characteristicsToDiscover valueForKeyPath:@"description"] componentsJoinedByString:@", "]);
     [peripheral discoverCharacteristics:characteristicsToDiscover forService:service];
@@ -136,12 +139,19 @@
   }
   NSArray* charsOfService = self.servicesAndCharacteristics[service.UUID];
   
-  if (charsOfService.count != service.characteristics.count) {
+  if (charsOfService && charsOfService.count && charsOfService.count > service.characteristics.count) {
     NSArray* missingServices = [charsOfService filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"NOT (SELF IN %@)", [service.characteristics valueForKeyPath:@"UUID"]]];
     DDLogWarn(@"BLE-PeripheralDelegate: inconsistency in characteristics discovery for service %@. Searched for %d, discovered only %d (missing: %@)", service.UUID, charsOfService.count, service.characteristics.count, [missingServices componentsJoinedByString:@", "]);
   }
   
   if (self.servicesByUUID.count == self.servicesAndCharacteristics.count) {
+    [self completedDiscovery];
+  }
+  // if the services were provided, but the characterstics were not
+  else if (self.servicesByUUID.count == self.servicesAndCharacteristics.count && !charsOfService.count) {
+    [self completedDiscovery];
+  }
+  else if (!self.servicesAndCharacteristics && self.servicesByUUID.count == self.discoveredServices.count) {
     [self completedDiscovery];
   }
 }
