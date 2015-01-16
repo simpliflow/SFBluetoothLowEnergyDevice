@@ -8,8 +8,8 @@ Pod::Spec.new do |spec|
   spec.ios.deployment_target  = '7.0'
   spec.authors      = 'Thomas Billicsich'
   spec.source_files     = 'SFBluetoothLowEnergyDevice/Classes/*.{h,m}'
+  spec.dependency  'CocoaLumberjack'
   spec.source     = { :git => 'https://github.com/simpliflow/SFBluetoothLowEnergyDevice.git', :tag => 'v0.10.2' }
-  spec.dependency  'CocoaLumberjack', '~> 1.9.2'
   spec.framework  = 'CoreBluetooth'
   spec.requires_arc = true
 end

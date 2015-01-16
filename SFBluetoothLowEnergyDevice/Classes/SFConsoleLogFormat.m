@@ -59,21 +59,21 @@
 - (NSString *)formatLogMessage:(DDLogMessage *)logMessage
 {
   NSString *logLevel;
-  switch (logMessage->logFlag)
+  switch (logMessage.flag)
   {
-    case LOG_FLAG_ERROR : logLevel = @"ERR"; break;
-    case LOG_FLAG_WARN  : logLevel = @"WRN"; break;
-    case LOG_FLAG_INFO  : logLevel = @"INF"; break;
-    case LOG_FLAG_DEBUG : logLevel = @"DBG"; break;
-    default             : logLevel = @"VRB"; break;
+    case DDLogFlagError : logLevel = @"ERR"; break;
+    case DDLogFlagWarning  : logLevel = @"WRN"; break;
+    case DDLogFlagInfo  : logLevel = @"INF"; break;
+    case DDLogFlagDebug : logLevel = @"DBG"; break;
+    case DDLogFlagVerbose : logLevel = @"VRB"; break;
   }
 
   // for the record in case a simple file name is needed
   // NSString* simpleFilename = DDExtractFileNameWithoutExtension(logMessage->file, NO);
   
-  NSString* dateString = [self stringFromDate:(logMessage->timestamp)];
+  NSString* dateString = [self stringFromDate:(logMessage.timestamp)];
   
-  NSString* logString = [NSString stringWithFormat:@"%@ %@. %@", logLevel, dateString, logMessage->logMsg];
+  NSString* logString = [NSString stringWithFormat:@"%@ %@. %@", logLevel, dateString, logMessage.message];
   return logString;
 }
 
