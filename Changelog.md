@@ -1,5 +1,7 @@
 # SFBluetoothLowEnergyDevice
 
+## Version 0.10.3
+* Updated to CocoaLumberjack 2-RC
 
 ## Version 0.10.0
 * First public release
