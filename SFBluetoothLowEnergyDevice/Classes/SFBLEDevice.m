@@ -501,8 +501,9 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
 
   CBUUID* batteryServiceUUID = [CBUUID UUIDWithString:kBLEServiceBattery];
   CBUUID* batteryLevelCharacteristicUUID = [CBUUID UUIDWithString:kBLECharBatteryLevel];
+  NSMutableDictionary* servicesOfIncommingUUID = [self.peripheralDelegate incomingServiceByUUID];
   
-  BOOL hasBatteryService = [self.servicesAndCharacteristics.allKeys containsObject:batteryServiceUUID];
+  BOOL hasBatteryService = [servicesOfIncommingUUID.allKeys containsObject:batteryServiceUUID];
   BOOL hasBatteryLevelCharacteristic = [self.servicesAndCharacteristics[batteryServiceUUID] containsObject:batteryLevelCharacteristicUUID];
   
   if (hasBatteryService && hasBatteryLevelCharacteristic)

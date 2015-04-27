@@ -29,5 +29,6 @@
 
 - (CBCharacteristic*)characteristic:(CBUUID*)characteristicUUID;
 - (CBService*)service:(CBUUID*)serviceUUID;
+- (NSMutableDictionary*) incomingServiceByUUID;
 
 @end

@@ -17,6 +17,8 @@
 
 #define DISCOVERY_TIMEOUT 2.0
 
+// Services
+static NSString* kBleServiceHeartRate = @"180D";
 
 
 
@@ -70,6 +72,11 @@
   return self.servicesByUUID[serviceUUID];
 }
 
+
+- (NSMutableDictionary*) incomingServiceByUUID
+{
+  return self.servicesByUUID;
+}
 
 
 
@@ -152,6 +159,10 @@
     [self completedDiscovery];
   }
   else if (!self.servicesAndCharacteristics && self.servicesByUUID.count == self.discoveredServices.count) {
+    [self completedDiscovery];
+  }
+  //viiiiva belts do not have battery characteristic => serviceByUUID will only contain heartrate
+  else if([self.servicesByUUID.allKeys containsObject:[CBUUID UUIDWithString:kBleServiceHeartRate]] && self.servicesByUUID.count == 1) {
     [self completedDiscovery];
   }
 }
