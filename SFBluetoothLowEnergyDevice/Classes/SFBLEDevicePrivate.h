@@ -61,6 +61,7 @@ typedef NS_ENUM(NSInteger, SFBLEDeviceState) {
 - (void)completedDiscovery;
 - (void)discoveryTimedOut;
 - (void)didUpdateValueForCharacteristic:(CBCharacteristic*)characteristic error:(NSError*)error;
+- (void)didWriteValueForCharacteristic:(CBCharacteristic*)characteristic error:(NSError*)error;
 
 
 @end

@@ -479,6 +479,21 @@ static NSMutableDictionary* __allDiscoveredDevicesSinceAppStart;
   }
 }
 
+- (void)didWriteValueForCharacteristic:(CBCharacteristic*)characteristic error:(NSError*)error
+{
+  if (self.state != SFBLEDeviceStateLinked)
+    return;
+  
+  if (error) {
+    DDLogWarn(@"BLE-Device: transmission not successful via %@", characteristic.UUID);
+    return;
+  } else {
+    DDLogDebug(@"BLE-Device: successfully transmitted via %@", characteristic.UUID);
+    return;
+  }
+}
+
+
 
 - (NSString*)name
 {

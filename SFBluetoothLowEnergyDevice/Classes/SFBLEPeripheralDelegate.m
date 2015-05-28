@@ -236,6 +236,16 @@ static NSString* kBleServiceHeartRate = @"180D";
   [self.device didUpdateValueForCharacteristic:characteristic error:error];
 }
 
+- (void)peripheral:(CBPeripheral *)peripheral didWriteValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error
+{
+  if (error) {
+    DDLogWarn(@"error: %@ %@", [error localizedDescription], error);
+    return;
+  }
+  
+  [self.device didWriteValueForCharacteristic:characteristic error:error];
+}
+
 
 - (void)peripheralDidUpdateName:(CBPeripheral *)peripheral
 {
