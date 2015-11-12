@@ -274,7 +274,7 @@ static dispatch_queue_t __bleQueue;
   }
 
   if ( (self.identifierToScanFor && [self.identifierToScanFor isEqual:peripheral.identifier]) ||
-      (self.nameToScanFor && [self.nameToScanFor isEqualToString:peripheral.name]) ||
+      (self.nameToScanFor && ![peripheral.name rangeOfString:self.nameToScanFor].location == NSNotFound) ||
       self.stopAfterFirstDevice)
   {
     DDLogDebug(@"BLE-Finder: did discover specific peripheral: %@", peripheral);
